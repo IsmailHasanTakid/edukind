@@ -191,36 +191,8 @@ export default function MentorPage() {
                 className="pointer-events-none absolute right-0 top-[420px] h-72 w-72 rounded-full bg-cyan-500/[0.04] blur-[110px]"
             />
 
-            <section className="relative mx-auto w-full max-w-7xl px-4 pb-8 pt-8 sm:px-6 sm:pb-20 sm:pt-16 lg:px-8 lg:pt-10">
-                {/* Hero */}
-                <header className="mx-auto max-w-3xl text-center">
-                    <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-300/[0.15] bg-violet-300/[0.05] px-3.5 py-2">
-                        <span className="relative flex h-2 w-2">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-300 opacity-40 motion-reduce:animate-none" />
-                            <span className="relative inline-flex h-2 w-2 rounded-full bg-violet-300" />
-                        </span>
+            <section className="relative mx-auto w-full max-w-7xl px-4 pb-8 pt-2 sm:px-6 sm:pb-20 sm:pt-2 lg:px-8 lg:pt-2">
 
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-200 sm:text-[11px]">
-                            Your Personal AI Learning Space
-                        </span>
-                    </div>
-
-                    <h1 className="text-3xl font-semibold leading-[1.12] tracking-[-0.055em] text-white sm:text-5xl lg:text-4xl">
-                        Your next breakthrough
-
-                        <span className="mt-2 block bg-gradient-to-r from-violet-300 via-cyan-200 to-violet-300 bg-clip-text text-transparent">
-                            starts here.
-                        </span>
-                    </h1>
-
-                    <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-zinc-400 sm:text-base sm:leading-8">
-                        Learn new concepts, solve challenging problems,
-                        build stronger skills, and shape your future
-                        with EDUKIND AI Mentor.
-                    </p>
-                </header>
-
-                {/* Section heading */}
                 <div className="mb-5 mt-5 flex flex-wrap items-end justify-between gap-3 sm:mb-6 sm:mt-8">
                     <div>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">

@@ -1,6 +1,7 @@
 
 "use client";
-
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -82,6 +83,7 @@ export default function AskAIMentorPage() {
     const [searchOpen, setSearchOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [showNotice, setShowNotice] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     function startNewChat() {
         setActiveChat(null);
@@ -97,25 +99,79 @@ export default function AskAIMentorPage() {
         setShowNotice(true);
     }
 
-    function handleSend(value = prompt) {
+
+    async function handleSend(value = prompt) {
         const text = value.trim();
-        if (!text) return;
 
-        const title = text.length > 34 ? `${text.slice(0, 34)}...` : text;
+        if (!text || isLoading) return;
 
-        setMessages((previous) => [
-            ...previous,
-            { id: Date.now(), text, role: "user" },
-        ]);
+        const previousMessages = messages;
+
+        const userMessage = {
+            id: Date.now(),
+            text,
+            role: "user",
+        };
+
+        setMessages((previous) => [...previous, userMessage]);
 
         if (!activeChat) {
+            const title =
+                text.length > 34 ? `${text.slice(0, 34)}...` : text;
+
             setActiveChat(title);
             setChats((previous) => [title, ...previous]);
         }
 
         setPrompt("");
-        setShowNotice(true);
+        setShowNotice(false);
+        setIsLoading(true);
+
+        try {
+            const response = await fetch("/api/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    messages: [
+                        ...previousMessages.map(({ role, text }) => ({
+                            role,
+                            text,
+                        })),
+                        { role: "user", text },
+                    ],
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "AI request failed.");
+            }
+
+            setMessages((previous) => [
+                ...previous,
+                {
+                    id: Date.now() + 1,
+                    text: data.reply,
+                    role: "assistant",
+                },
+            ]);
+        } catch (error) {
+            setMessages((previous) => [
+                ...previous,
+                {
+                    id: Date.now() + 1,
+                    text: `দুঃখিত, AI উত্তর দিতে পারেনি। ${error.message}`,
+                    role: "assistant",
+                },
+            ]);
+        } finally {
+            setIsLoading(false);
+        }
     }
+
 
     const filteredChats = chats.filter((chat) =>
         chat.toLowerCase().includes(searchTerm.toLowerCase())
@@ -385,34 +441,63 @@ export default function AskAIMentorPage() {
                                                 <Sparkles className="h-4 w-4 text-violet-300" />
                                             </div>
                                         )}
+
                                         <div
-                                            className={`max-w-[85%] rounded-2xl px-4 py-3.5 text-sm leading-7 ${message.role === "user"
+                                            className={`w-full max-w-full rounded-2xl px-5 py-4 text-sm leading-7 ${message.role === "user"
                                                 ? "border border-violet-400/15 bg-violet-500/[0.13] text-slate-100"
                                                 : "border border-white/[0.06] bg-white/[0.025] text-slate-300"
                                                 }`}
                                         >
-                                            {message.text}
+                                            {message.role === "assistant" ? (
+                                                <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap break-words
+            prose-headings:font-semibold prose-headings:text-slate-100
+            prose-headings:mt-4 prose-headings:mb-2
+            prose-p:my-2 prose-p:leading-7
+            prose-ul:my-2 prose-ol:my-2
+            prose-li:my-1
+            prose-strong:text-white
+            prose-code:rounded prose-code:bg-slate-800
+            prose-code:px-1 prose-code:py-0.5 prose-code:text-violet-300
+            prose-pre:overflow-x-auto prose-pre:rounded-xl
+            prose-pre:border prose-pre:border-white/10
+            prose-pre:bg-slate-950
+            prose-table:block prose-table:overflow-x-auto
+            prose-th:border prose-th:border-white/10
+            prose-th:px-3 prose-th:py-2
+            prose-td:border prose-td:border-white/10
+            prose-td:px-3 prose-td:py-2"
+                                                >
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                        {message.text}
+                                                    </ReactMarkdown>
+                                                </div>
+                                            ) : (
+                                                <div className="whitespace-pre-wrap break-words">
+                                                    {message.text}
+                                                </div>
+                                            )}
                                         </div>
+
                                     </div>
                                 ))}
 
-                                {showNotice && (
-                                    <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.04] p-4 text-xs leading-6 text-amber-200/80">
-                                        <div className="mb-1 flex items-center gap-2 font-medium">
-                                            <Sparkles className="h-4 w-4" />
-                                            UI preview only
+                                {isLoading && (
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-violet-400/15 bg-violet-400/10">
+                                            <Sparkles className="h-4 w-4 animate-pulse text-violet-300" />
                                         </div>
-                                        Your message is displayed, but AI responses are not
-                                        connected yet. We will connect the Gemini API in the next
-                                        step.
+
+                                        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.025] px-4 py-3 text-sm text-slate-400">
+                                            তোমার AI Mentor উত্তর তৈরি করছে...
+                                        </div>
                                     </div>
                                 )}
                             </div>
                         )}
                     </div>
 
-
-                    <div className="relative z-20 mb-10 shrink-0 bg-[#080A12]/95 px-4 pb-3 pt-1 backdrop-blur-xl sm:mb-14 sm:px-7 sm:pb-4">
+                    {/* chat */}
+                    <div className="relative z-20 mb-16 shrink-0 bg-[#080A12]/95 px-4 pb-3 pt-1 backdrop-blur-xl sm:px-7 sm:mb-35">
                         <div className="mx-auto max-w-3xl">
                             <form
                                 onSubmit={(event) => {
@@ -464,7 +549,7 @@ export default function AskAIMentorPage() {
 
                                     <button
                                         type="submit"
-                                        disabled={!prompt.trim()}
+                                        disabled={!prompt.trim() || isLoading}
                                         aria-label="Send message"
                                         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-white shadow-[0_3px_18px_rgba(139,92,246,0.24)] transition hover:scale-105 hover:shadow-[0_3px_25px_rgba(139,92,246,0.4)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:scale-100"
                                     >

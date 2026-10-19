@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -101,22 +100,19 @@ export default function Navbar() {
     return (
         <>
             <header
-                className={`pointer-events-none sticky top-0 z-50 w-full px-3 sm:px-5 lg:px-8 ${scrolled ? "pt-2" : "pt-4"
-                    }`}
+                className="pointer-events-none sticky top-0 z-50 w-full"
             >
+                {/* Removed max-width and padding to make it full width */}
                 <div
-                    className={`pointer-events-auto relative mx-auto max-w-[1440px] rounded-[22px] p-px transition-shadow duration-300 motion-reduce:transition-none ${scrolled
-                        ? "shadow-[0_18px_55px_-22px_rgba(0,0,0,0.9)]"
-                        : "shadow-[0_12px_40px_-22px_rgba(0,0,0,0.85)]"
-                        }`}
+                    className="pointer-events-auto relative w-full shadow-none"
                     style={{
                         background:
                             "linear-gradient(125deg, rgba(103,232,249,.38), rgba(255,255,255,.09) 32%, rgba(129,140,248,.22) 72%, rgba(255,255,255,.08))",
                     }}
                 >
+                    {/* Removed borders (border-white/[0.045] -> border-none) */}
                     <div
-                        className={`relative grid grid-cols-[1fr_auto_1fr] items-center gap-2 overflow-hidden rounded-[21px] border border-white/[0.045] bg-[#080B12]/95 px-3 backdrop-blur-2xl backdrop-saturate-150 transition-[height] duration-300 motion-reduce:transition-none sm:px-5 lg:px-6 ${scrolled ? "h-[62px]" : "h-[74px]"
-                            }`}
+                        className={`relative grid grid-cols-[1fr_auto_1fr] items-center gap-2 overflow-hidden border-none bg-[#080B12]/95 px-3 py-5 backdrop-blur-2xl backdrop-saturate-150 sm:px-5 lg:px-6`}
                     >
                         {/* Ambient light */}
                         <div
@@ -135,7 +131,7 @@ export default function Navbar() {
                         />
 
                         {/* Brand */}
-                        <div className="relative z-10 flex min-w-0 items-center">
+                        <div className="relative z-10 flex min-w-0 items-center pl-5 sm:pl-8 lg:pl-15">
                             <Link
                                 href={brand.href}
                                 aria-label={`${brand.name} home`}
@@ -210,7 +206,6 @@ export default function Navbar() {
 
                         {/* Right side */}
                         <div className="relative z-10 col-start-3 flex items-center justify-self-end">
-
                             <button
                                 type="button"
                                 onClick={() => setMenuOpen(true)}
