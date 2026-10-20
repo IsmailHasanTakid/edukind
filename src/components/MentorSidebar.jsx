@@ -17,7 +17,7 @@ import {
 
 const mentorItems = [
     { name: "Career", href: "/mentor/career", icon: BriefcaseBusiness },
-    { name: "Chat", href: "/mentor/chat", icon: MessageCircle },
+    { name: "Ask AI", href: "/mentor/chat", icon: MessageCircle },
     { name: "Code", href: "/mentor/code", icon: Code2 },
     { name: "Learn", href: "/mentor/learn", icon: BookOpen },
     { name: "Memory", href: "/mentor/memory", icon: Brain },

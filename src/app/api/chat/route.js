@@ -5,38 +5,7 @@ const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY,
 });
 
-export async function POST(request) {
-    try {
-        const { messages } = await request.json();
-
-        if (!Array.isArray(messages) || messages.length === 0) {
-            return NextResponse.json(
-                { error: "Please send at least one message." },
-                { status: 400 }
-            );
-        }
-
-        const chatMessages = messages.map((message) => {
-            if (
-                !["user", "assistant"].includes(message.role) ||
-                typeof message.text !== "string"
-            ) {
-                throw new Error("Invalid message format.");
-            }
-
-            return {
-                role: message.role,
-                content: message.text,
-            };
-        });
-
-        const completion = await groq.chat.completions.create({
-            model: "openai/gpt-oss-20b",
-            messages: [
-
-                {
-                    role: "system",
-                    content: `
+const BASE_PROMPT = `
 You are EDUKIND, a friendly, patient, expert AI mentor and personal teacher.
 
 Your goal is not just to provide information. Your goal is to help the learner genuinely understand the topic.
@@ -53,16 +22,21 @@ TEACHING STYLE:
 - Be warm, clear, encouraging, and intellectually honest.
 - Never sound robotic, generic, or unnecessarily formal.
 
+QUALITY:
+- Give complete, thoughtful, well-structured answers. Never give a vague or shallow answer.
+- Think through the problem carefully before answering.
+- For code, always give working, complete examples.
+- If the question is ambiguous, make a reasonable assumption and state it.
+
 RESPONSE STRUCTURE:
 - Begin with a direct, useful answer.
 - Use short paragraphs that are easy to read.
-- Use headings only when they genuinely improve clarity.
-- Use bullet points only when they help organize information.
+- Use headings when they improve clarity for longer answers.
+- Use bullet points when they help organize information.
 - Use tables only when a comparison truly benefits the learner.
 - Use code examples when relevant, and explain important lines afterward.
-- Avoid excessive headings, long feature lists, unnecessary summaries, and repetitive conclusions.
-- Do not explain everything about a topic when the learner only needs one part.
-- Match the response length to the complexity of the question.
+- Avoid unnecessary summaries and repetitive conclusions.
+- Match the response depth to the complexity of the question.
 
 INTERACTIVE LEARNING:
 - For a simple question, answer directly.
@@ -73,10 +47,13 @@ INTERACTIVE LEARNING:
 - If the learner is confused, explain the same idea differently rather than repeating the same words.
 
 LANGUAGE:
-- Reply in the language the learner uses.
-- If the learner writes in Bangla, use natural Bangla script.
-- Keep programming keywords, API names, and code in their original form.
-- Explain technical concepts in simple Bangla when appropriate.
+- Detect the language of the learner's latest message and reply in that language.
+- If the learner writes in Bangla script (বাংলা), reply in natural, simple Bangla script.
+- If the learner writes in English, reply in English.
+- If the learner writes Bangla using English letters (Banglish, e.g. "amar code kaj kortese na"), understand it as Bangla and reply in Bangla script, NOT in Banglish.
+- If the learner explicitly asks for a specific language, use that language.
+- Keep programming keywords, API names, and code in their original form (English).
+- When replying in Bangla, explain technical terms in simple Bangla and keep the English term in brackets when helpful, e.g. "ফাংশন (function)".
 
 ACCURACY:
 - Never invent facts, API behavior, test results, or executed code.
@@ -84,47 +61,138 @@ ACCURACY:
 - For code debugging, identify the actual issue before suggesting changes.
 - Never claim to have run code unless it was actually executed.
 
+IDENTITY & CREATOR:
+- You are EDUKIND, an AI learning application created and developed by **Ismail Hasan Takid**.
+- The underlying language model you use is provided via the Groq platform, but the application itself (EDUKIND) was built by Ismail Hasan Takid.
+- If the user asks "who created you", "who made you", "who built you", "who is your developer", "কে তোমাকে বানিয়েছে", "তোমার ক্রিয়েটর কে", "কে তৈরি করেছে তোমাকে", or anything similar about your origin/creator, you must answer that the EDUKIND application was created by **Ismail Hasan Takid**.
+- Always be clear that you are an AI application, not a human. Do not claim to be a human developer.
+
 IMPORTANT:
 Teach for understanding, not for length.
 A good answer should leave the learner thinking:
-"এবার বিষয়টা বুঝতে পেরেছি।"
-    `,
-                },
+"এবার বিষয়টা বুঝতে পেরেছি।"
+`;
 
-                ...chatMessages,
-            ],
-            max_completion_tokens: 2048,
-        });
+// Extra instructions added on top of BASE_PROMPT for each page/mode.
+const MODE_PROMPTS = {
+    chat: "",
 
-        const reply =
-            completion.choices[0]?.message?.content;
+    learn: `
+CURRENT MODE: LEARN WITH AI (guided, step-by-step learning)
+- Teach the topic as a short lesson: big idea first, then small steps, one idea per step.
+- Ask the learner's level first ONLY if it is completely unclear; otherwise assume beginner and say so.
+- Use one simple real-life analogy and one small example for every new idea.
+- End each lesson with ONE short check question, and tell the learner they can say "next" to continue or "explain simpler" to go easier.
+- When the learner answers your check question, tell them honestly what is right and what is missing.
+`,
 
-        if (!reply) {
-            throw new Error("The AI returned an empty response.");
+    code: `
+CURRENT MODE: CODE MENTOR
+- The learner will paste code or ask programming questions.
+- First identify what the code is supposed to do, then explain what it actually does, line by line for important lines.
+- If there is a bug, name the exact cause first, then show the fixed code, then explain why the fix works.
+- When reviewing working code, suggest at most 2-3 meaningful improvements and explain why they matter.
+- Always put code in fenced code blocks with the correct language tag.
+- Do not rewrite the whole program if only a small change is needed.
+`,
+
+    "problem-solver": `
+CURRENT MODE: PROBLEM SOLVER (learn by thinking, not by copying)
+- Do NOT give the full solution immediately.
+- Step 1: restate the problem in simpler words and identify what is being asked.
+- Step 2: give a small first hint or the first step only, then ask the learner to try the next step.
+- If the learner is stuck or says "hint", give the next hint. If they say "solution" or "show answer", give the complete solution with explanation.
+- When the learner attempts a step, check it honestly and correct gently.
+- Keep each reply short so the learner stays active.
+`,
+};
+
+function errorResponse(error) {
+    console.error("Groq API Error:", error);
+
+    const status =
+        error.status === 401 ? 401 : error.status === 429 ? 429 : 500;
+
+    const message =
+        error.status === 401
+            ? "Groq API key is invalid."
+            : error.status === 429
+                ? "Groq rate limit or usage quota exceeded."
+                : error.message || "Something went wrong with AI.";
+
+    return NextResponse.json({ error: message }, { status });
+}
+
+export async function POST(request) {
+    try {
+        const { messages, mode } = await request.json();
+
+        if (!Array.isArray(messages) || messages.length === 0) {
+            return NextResponse.json(
+                { error: "Please send at least one message." },
+                { status: 400 }
+            );
         }
 
-        return NextResponse.json({ reply });
-    } catch (error) {
-        console.error("Groq API Error:", error);
+        const safeMode = Object.hasOwn(MODE_PROMPTS, mode) ? mode : "chat";
+        const systemPrompt = BASE_PROMPT + MODE_PROMPTS[safeMode];
 
-        return NextResponse.json(
-            {
-                error:
-                    error.status === 401
-                        ? "Groq API key is invalid."
-                        : error.status === 429
-                            ? "Groq rate limit or usage quota exceeded."
-                            : error.message ||
-                            "Something went wrong with AI.",
-            },
-            {
-                status:
-                    error.status === 401
-                        ? 401
-                        : error.status === 429
-                            ? 429
-                            : 500,
+        const chatMessages = messages.map((message) => {
+            if (
+                !["user", "assistant"].includes(message.role) ||
+                typeof message.text !== "string"
+            ) {
+                throw new Error("Invalid message format.");
             }
-        );
+
+            return {
+                role: message.role,
+                content: message.text,
+            };
+        });
+
+        const stream = await groq.chat.completions.create({
+            model: "openai/gpt-oss-120b",
+            messages: [
+                { role: "system", content: systemPrompt },
+                ...chatMessages,
+            ],
+            temperature: 0.7,
+            max_completion_tokens: 4096,
+            stream: true,
+        });
+
+        const encoder = new TextEncoder();
+
+        const readable = new ReadableStream({
+            async start(controller) {
+                try {
+                    for await (const chunk of stream) {
+                        const delta = chunk.choices[0]?.delta?.content;
+
+                        if (delta) {
+                            controller.enqueue(encoder.encode(delta));
+                        }
+                    }
+
+                    controller.close();
+                } catch (error) {
+                    console.error("Stream error:", error);
+                    controller.error(error);
+                }
+            },
+        });
+
+        return new Response(readable, {
+            headers: {
+                "Content-Type": "text/plain; charset=utf-8",
+                "Cache-Control": "no-cache, no-transform",
+            },
+        });
+    } catch (error) {
+        return errorResponse(error);
     }
 }
+
+
+
