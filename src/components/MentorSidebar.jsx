@@ -20,7 +20,6 @@ const mentorItems = [
     { name: "Ask AI", href: "/mentor/chat", icon: MessageCircle },
     { name: "Code", href: "/mentor/code", icon: Code2 },
     { name: "Learn", href: "/mentor/learn", icon: BookOpen },
-    { name: "Memory", href: "/mentor/memory", icon: Brain },
     { name: "Problem Solver", href: "/mentor/problem-solver", icon: Lightbulb },
     { name: "Study Planner", href: "/mentor/study-planner", icon: CalendarDays },
 ];
@@ -29,8 +28,8 @@ export default function MentorSidebar() {
     const pathname = usePathname();
 
     return (
-        <aside className="flex h-full w-[250px] shrink-0 flex-col border-r border-white/[0.08] bg-[#080B12] text-white">
-            <div className="flex h-16 items-center gap-3 border-b border-white/[0.08] px-5">
+        <aside className="sticky top-0 flex h-[calc(100dvh-64px)] w-[250px] shrink-0 flex-col overflow-hidden border-r border-white/[0.08] bg-[#080B12] text-white">
+            <div className="flex h-16 items-center gap-3 border-b border-white/[0.08] px-5 pt-7 pb-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10">
                     <Sparkles size={18} className="text-cyan-300" />
                 </div>

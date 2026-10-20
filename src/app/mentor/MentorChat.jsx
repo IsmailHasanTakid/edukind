@@ -22,6 +22,7 @@ import {
     MoreHorizontal,
     Plus,
     Search,
+    CalendarDays,
     Send,
     Settings2,
     Sparkles,
@@ -41,6 +42,7 @@ const ICONS = {
     lightbulb: Lightbulb,
     target: Target,
     chat: MessageCircle,
+    calendar: CalendarDays,
 };
 
 const iconColors = {
@@ -247,7 +249,7 @@ export default function MentorChat({
     );
 
     return (
-        <main className="relative flex h-[100dvh] overflow-hidden bg-[#080A12] text-slate-100 selection:bg-violet-500/30">
+        <main className="relative flex h-full min-h-0 w-full overflow-hidden bg-[#080A12] text-slate-100 selection:bg-violet-500/30">
             {/* Ambient background */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
                 <div
@@ -270,8 +272,7 @@ export default function MentorChat({
 
                     {/* Sidebar */}
                     <aside
-                        className={`fixed inset-y-0 left-0 z-50 flex w-[285px] flex-col border-r border-white/[0.07] bg-[#0B0D17]/95 backdrop-blur-2xl transition-transform duration-300 lg:relative lg:z-10 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
-                            }`}
+                        className={`fixed inset-y-0 left-0 z-50 flex w-[285px] flex-col border-r border-white/[0.07] bg-[#0B0D17]/95 backdrop-blur-2xl transition-transform duration-300 lg:relative lg:z-10 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
                     >
                         {/* Brand */}
                         <div className="flex h-[76px] shrink-0 items-center justify-between border-b border-white/[0.06] px-5">
@@ -399,7 +400,7 @@ export default function MentorChat({
             )}
 
             {/* Main workspace */}
-            <section className="relative z-10 flex min-w-0 flex-1 flex-col">
+            <section className="relative z-10 flex min-w-0 flex-1 flex-col lg:ml-[285px]">
                 {showSidebar ? (
                     /* Mobile menu bar */
                     <div className="flex shrink-0 items-center px-4 pb-1 pt-3 lg:hidden">

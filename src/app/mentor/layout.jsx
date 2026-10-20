@@ -1,3 +1,4 @@
+
 "use client";
 
 import { usePathname } from "next/navigation";
@@ -11,18 +12,18 @@ export default function MentorLayout({ children }) {
         "/mentor/learn",
         "/mentor/code",
         "/mentor/problem-solver",
+
     ];
 
     const shouldHideSidebar = hideSidebarRoutes.includes(pathname);
 
-
     return (
-        <div className="flex min-h-[calc(100vh-64px)] bg-[#0B1120] text-white">
+        <div className="flex h-full overflow-hidden bg-[#0B1120] text-white">
             {!shouldHideSidebar && <MentorSidebar />}
 
-            <div className="min-w-0 flex-1">
+            <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
                 {children}
-            </div>
+            </main>
         </div>
     );
 }

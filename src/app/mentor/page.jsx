@@ -60,15 +60,6 @@ const mentorFeatures = [
         label: "PLAN YOUR GROWTH",
     },
     {
-        title: "Mentor Memory",
-        description:
-            "Keep important learning notes and revisit useful explanations.",
-        href: "/mentor/memory",
-        icon: Brain,
-        accent: "purple",
-        label: "SAVE WHAT MATTERS",
-    },
-    {
         title: "Career Guidance",
         description:
             "Explore career paths, identify skills, and plan your next steps.",

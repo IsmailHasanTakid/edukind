@@ -18,6 +18,7 @@ import {
     History,
     Lightbulb,
     Menu,
+    CalendarDays,
     MessageCircle,
     MoreHorizontal,
     Plus,

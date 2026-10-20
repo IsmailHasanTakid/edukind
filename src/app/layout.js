@@ -12,7 +12,9 @@ export default function RootLayout({ children }) {
     <html lang="en" className="dark">
       <body className="min-h-screen flex flex-col">
         <HideNavbar />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 px-12">
+          {children}
+        </main>
       </body>
     </html>
   );
