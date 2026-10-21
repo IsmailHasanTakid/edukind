@@ -6,5 +6,5 @@ export const primaryNav = [
     { id: "mentor", label: "AI Mentor", href: "/mentor", ready: true },
     { id: "learning", label: "Learning", href: "/learning", ready: true },
     { id: "humanity", label: "Humanity Hub", href: "/humanity", ready: false },
-    { id: "explore", label: "Explore", href: "/explore", ready: false },
+    { id: "deen-islam", label: "DeenIslam", href: "/deen-islam", ready: true },
 ];

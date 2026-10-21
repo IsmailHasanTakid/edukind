@@ -44,7 +44,7 @@ export default function CareerMentorPage() {
     return (
         <MentorChat
             mode="career"
-            showSidebar={false}
+            hideSidebar
             title="Your Career, Reimagined."
             description="তোমার পরবর্তী পদক্ষেপ কী? সঠিক skill বেছে নাও, নিজের roadmap তৈরি করো এবং আত্মবিশ্বাসের সঙ্গে career-এর দিকে এগিয়ে যাও।"
             heroIcon="target"

@@ -254,7 +254,7 @@ function GoalForm({ onCreate }) {
             <header className="pb-8 pt-3 text-center sm:pb-10 sm:pt-2">
 
 
-                <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-fuchsia-300/15 bg-fuchsia-300/[0.06] px-3.5 py-1.5">
+                <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-fuchsia-300/15 bg-fuchsia-300/[0.06] px-3.5 py-1.5">
                     <span className="relative flex h-2 w-2">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-fuchsia-400 opacity-50" />
                         <span className="relative inline-flex h-2 w-2 rounded-full bg-fuchsia-300" />
@@ -264,15 +264,10 @@ function GoalForm({ onCreate }) {
                     </span>
                 </div>
 
-                <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-[46px] lg:leading-[1.15]">
+                <h1 className=" text-3xl mt-2 font-semibold tracking-tight text-white sm:text-3xl lg:text-[30px] lg:leading-[1.15]">
                     তোমার পরবর্তী লক্ষ্য,এবার পরিকল্পনামাফিক।
 
                 </h1>
-
-                <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-slate-400 sm:text-[15px]">
-                    তোমার লক্ষ্য, সময় আর শেখার অভিজ্ঞতা অনুযায়ী একটি
-                    structured study plan তৈরি করো।
-                </p>
 
                 <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
                     <HeroPill icon={Target} label="Clear goals" />
