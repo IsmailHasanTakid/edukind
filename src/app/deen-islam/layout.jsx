@@ -1,14 +1,5 @@
-
-import DeenSidebar from "@/components/deen/DeenSidebar";
+import DeenShell from "@/components/deen/DeenShell";
 
 export default function DeenIslamLayout({ children }) {
-    return (
-        <div className="relative min-h-screen">
-            <DeenSidebar />
-
-            <div className="min-w-0 lg:pl-[260px]">
-                {children}
-            </div>
-        </div>
-    );
+    return <DeenShell>{children}</DeenShell>;
 }

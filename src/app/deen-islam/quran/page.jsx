@@ -1,4 +1,5 @@
 import Link from "next/link";
+import QuranSearchFocus from "@/components/deen/QuranSearchFocus";
 import {
     ArrowDown,
     BookOpen,
@@ -29,6 +30,7 @@ export default async function QuranLibraryPage() {
         <main
             className={`${bangla.className} min-h-screen bg-[#F8F6EF] text-[#173B2D]`}
         >
+            <QuranSearchFocus />
             {/* Islamic luxury hero */}
             <section className="relative isolate overflow-hidden bg-[#092F25]">
                 <div

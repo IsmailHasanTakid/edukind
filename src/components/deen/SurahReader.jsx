@@ -4,15 +4,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
     Headphones,
     Pause,
-    Play,
+    Bookmark,
+    BookmarkCheck,
     SkipBack,
     SkipForward,
+    Play,
     X,
 } from "lucide-react";
 import { arabic } from "@/lib/deen-fonts";
 
 const bn = (n) => n.toLocaleString("bn-BD");
-const RATES = [0.75, 1, 1.25];
+
+const SURAH_BOOKMARKS_KEY = "deen-quran-surah-bookmarks";
 
 export default function SurahReader({
     surahNumber,
@@ -30,6 +33,106 @@ export default function SurahReader({
     const [playing, setPlaying] = useState(false);
     const [rate, setRate] = useState(1);
     const [error, setError] = useState(false);
+    const [bookmarks, setBookmarks] = useState([]);
+    const [surahBookmarks, setSurahBookmarks] = useState([]);
+
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem(SURAH_BOOKMARKS_KEY);
+
+            if (saved) {
+                const parsed = JSON.parse(saved);
+
+                if (Array.isArray(parsed)) {
+                    setSurahBookmarks(parsed);
+                }
+            }
+        } catch (error) {
+            console.error("সূরার বুকমার্ক লোড করা যায়নি:", error);
+        }
+    }, []);
+
+    const BOOKMARKS_KEY = "deen-quran-bookmarks";
+
+    // আগে সংরক্ষিত বুকমার্ক লোড করো
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem(BOOKMARKS_KEY);
+
+            if (saved) {
+                const parsed = JSON.parse(saved);
+
+                if (Array.isArray(parsed)) {
+                    setBookmarks(parsed);
+                }
+            }
+        } catch (error) {
+            console.error("বুকমার্ক লোড করা যায়নি:", error);
+        }
+    }, []);
+
+    // বুকমার্ক যোগ অথবা সরিয়ে ফেলো
+    function toggleBookmark(ayah) {
+        const exists = bookmarks.some(
+            (item) =>
+                item.surahNumber === surahNumber &&
+                item.ayahNumber === ayah.number
+        );
+
+        const updated = exists
+            ? bookmarks.filter(
+                (item) =>
+                    !(
+                        item.surahNumber === surahNumber &&
+                        item.ayahNumber === ayah.number
+                    )
+            )
+            : [
+                ...bookmarks,
+                {
+                    surahNumber,
+                    ayahNumber: ayah.number,
+                    arabic: ayah.arabic,
+                    bangla: ayah.bangla,
+                },
+            ];
+
+        try {
+            localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(updated));
+            setBookmarks(updated);
+        } catch (error) {
+            console.error("বুকমার্ক সংরক্ষণ করা যায়নি:", error);
+        }
+    }
+    function toggleSurahBookmark() {
+        const exists = surahBookmarks.some(
+            (item) => item.surahNumber === surahNumber
+        );
+
+        const updated = exists
+            ? surahBookmarks.filter(
+                (item) => item.surahNumber !== surahNumber
+            )
+            : [
+                ...surahBookmarks,
+                {
+                    surahNumber,
+                    ayahCount: ayahs.length,
+                    bookmarkedAt: new Date().toISOString(),
+                },
+            ];
+
+        try {
+            localStorage.setItem(
+                SURAH_BOOKMARKS_KEY,
+                JSON.stringify(updated)
+            );
+
+            setSurahBookmarks(updated);
+        } catch (error) {
+            console.error("সূরার বুকমার্ক সংরক্ষণ করা যায়নি:", error);
+        }
+    }
 
     const hasAudio = ayahs.some((ayah) => ayah.audio);
 
@@ -184,6 +287,36 @@ export default function SurahReader({
 
     return (
         <div>
+            {/* সম্পূর্ণ সূরা বুকমার্ক */}
+            <div className="mt-6 flex justify-end">
+                {(() => {
+                    const isBookmarked = surahBookmarks.some(
+                        (item) => item.surahNumber === surahNumber
+                    );
+
+                    return (
+                        <button
+                            type="button"
+                            onClick={toggleSurahBookmark}
+                            aria-pressed={isBookmarked}
+                            className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${isBookmarked
+                                ? "border-[#C9A14A]/50 bg-[#FBF5E6] text-[#8A6A22]"
+                                : "border-[#DCE4DF] bg-white text-[#1F6B4C] hover:border-[#C9A14A] hover:bg-[#FBF5E6]"
+                                }`}
+                        >
+                            {isBookmarked ? (
+                                <BookmarkCheck size={17} />
+                            ) : (
+                                <Bookmark size={17} />
+                            )}
+
+                            {isBookmarked
+                                ? "সূরা বুকমার্ক করা হয়েছে"
+                                : "সম্পূর্ণ সূরা বুকমার্ক করুন"}
+                        </button>
+                    );
+                })()}
+            </div>
             {/* সূরা শুনুন */}
             {hasAudio && (
                 <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#E3EAE5] bg-white/90 px-4 py-3 shadow-[0_4px_18px_rgba(20,60,45,0.06)] backdrop-blur">
@@ -260,25 +393,65 @@ export default function SurahReader({
                                 </span>
 
                                 {ayah.audio && (
-                                    <button
-                                        type="button"
-                                        onClick={() => toggleAyah(index)}
-                                        aria-label={
-                                            active && playing
-                                                ? `আয়াত ${bn(ayah.number)} বিরতি`
-                                                : `আয়াত ${bn(ayah.number)} শুনুন`
-                                        }
-                                        className={`flex h-9 w-9 items-center justify-center rounded-full border transition ${active && playing
-                                            ? "border-transparent bg-[#119A62] text-white"
-                                            : "border-[#DCE4DF] bg-white text-[#1F8A5B] hover:border-[#119A62]/50"
-                                            }`}
-                                    >
-                                        {active && playing ? (
-                                            <Pause size={15} />
-                                        ) : (
-                                            <Play size={15} className="ml-0.5" />
+                                    <div className="flex items-center gap-2">
+                                        {(() => {
+                                            const isBookmarked = bookmarks.some(
+                                                (item) =>
+                                                    item.surahNumber === surahNumber &&
+                                                    item.ayahNumber === ayah.number
+                                            );
+
+                                            return (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleBookmark(ayah)}
+                                                    aria-label={
+                                                        isBookmarked
+                                                            ? "বুকমার্ক সরিয়ে ফেলুন"
+                                                            : "আয়াত বুকমার্ক করুন"
+                                                    }
+                                                    aria-pressed={isBookmarked}
+                                                    title={
+                                                        isBookmarked
+                                                            ? "বুকমার্ক সরিয়ে ফেলুন"
+                                                            : "বুকমার্ক করুন"
+                                                    }
+                                                    className={`flex h-9 w-9 items-center justify-center rounded-full border transition ${isBookmarked
+                                                        ? "border-[#C9A14A]/50 bg-[#FBF5E6] text-[#A47A22]"
+                                                        : "border-[#DCE4DF] bg-white text-[#718078] hover:border-[#C9A14A]/60 hover:text-[#A47A22]"
+                                                        }`}
+                                                >
+                                                    {isBookmarked ? (
+                                                        <BookmarkCheck size={17} />
+                                                    ) : (
+                                                        <Bookmark size={17} />
+                                                    )}
+                                                </button>
+                                            );
+                                        })()}
+
+                                        {ayah.audio && (
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleAyah(index)}
+                                                aria-label={
+                                                    active && playing
+                                                        ? `আয়াত ${bn(ayah.number)} বিরতি`
+                                                        : `আয়াত ${bn(ayah.number)} শুনুন`
+                                                }
+                                                className={`flex h-9 w-9 items-center justify-center rounded-full border transition ${active && playing
+                                                    ? "border-transparent bg-[#119A62] text-white"
+                                                    : "border-[#DCE4DF] bg-white text-[#1F8A5B] hover:border-[#119A62]/50"
+                                                    }`}
+                                            >
+                                                {active && playing ? (
+                                                    <Pause size={15} />
+                                                ) : (
+                                                    <Play size={15} className="ml-0.5" />
+                                                )}
+                                            </button>
                                         )}
-                                    </button>
+                                    </div>
                                 )}
                             </div>
 
@@ -302,7 +475,7 @@ export default function SurahReader({
 
             {/* ভাসমান প্লেয়ার বার */}
             {current !== null && (
-                <div className="fixed inset-x-0 bottom-4 z-30 px-4">
+                <div className="fixed inset-x-0 bottom-20 z-30 px-4 lg:bottom-4 lg:pl-[276px]">
                     <div className="relative mx-auto max-w-2xl overflow-hidden rounded-2xl border border-[#E8C872]/30 bg-[#0B3B2D]/95 text-white shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl">
                         <div className="flex items-center gap-3 px-4 py-3">
                             <div className="min-w-0 flex-1">

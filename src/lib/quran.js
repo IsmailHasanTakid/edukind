@@ -24,6 +24,11 @@ async function request(path) {
 
     return json.data;
 }
+export async function getJuzList() {
+    const meta = await request("/meta");
+
+    return meta.juzs.references;
+}
 
 // হরকত বাদ দিয়ে তুলনার জন্য
 function plain(text) {
@@ -114,6 +119,7 @@ export async function searchAyahs(query) {
     const script = detectScript(query);
     const edition = SEARCH_EDITIONS[script];
     const empty = { script, count: 0, matches: [] };
+
 
     const res = await fetch(
         `${BASE}/search/${encodeURIComponent(query)}/all/${edition}`,
