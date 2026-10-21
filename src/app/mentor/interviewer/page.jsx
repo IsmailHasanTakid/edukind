@@ -15,7 +15,6 @@ import {
     Clock3,
     Code2,
     History,
-    LayoutDashboard,
     LoaderCircle,
     Mic,
     Plus,
@@ -26,6 +25,7 @@ import {
     Users,
     Zap,
 } from "lucide-react";
+import InterviewerSidebar from "@/components/interviewer/InterviewerSidebar";
 
 const TYPE_STYLES = {
     Technical: {
@@ -212,91 +212,15 @@ export default function InterviewerPage() {
     ];
 
     return (
-        <main className="min-h-screen overflow-hidden bg-[#080A12] text-white">
+        <main className="min-h-screen overflow-x-clip bg-[#080A12] text-white">
             <div className="pointer-events-none fixed inset-0 overflow-hidden">
                 <div className="absolute -top-48 left-1/3 h-96 w-96 rounded-full bg-violet-600/10 blur-[130px]" />
                 <div className="absolute right-0 top-[35%] h-80 w-80 rounded-full bg-cyan-500/[0.07] blur-[120px]" />
             </div>
 
-            <div className="relative mx-auto flex min-h-screen max-w-[1600px]">
+            <div className="relative flex min-h-screen w-full flex-col lg:flex-row">
                 {/* Sidebar */}
-                <aside className="hidden w-[250px] shrink-0 border-r border-white/[0.07] bg-[#0A0C15]/80 px-5 py-7 lg:flex lg:flex-col">
-                    <a href="/mentor" className="mb-10 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-violet-400/30 bg-gradient-to-br from-violet-500/25 to-cyan-400/10">
-                            <BrainCircuit className="h-6 w-6 text-cyan-300" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-bold tracking-[0.14em]">
-                                EDUKIND
-                            </p>
-                            <p className="text-[10px] tracking-[0.2em] text-violet-300">
-                                AI INTERVIEWER
-                            </p>
-                        </div>
-                    </a>
-
-                    <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                        Workspace
-                    </p>
-
-                    <nav className="space-y-1">
-                        <a
-                            href="/mentor/interviewer"
-                            className="flex items-center gap-3 rounded-xl border border-violet-400/20 bg-violet-500/[0.12] px-3 py-3 text-sm font-medium text-white"
-                        >
-                            <LayoutDashboard className="h-[18px] w-[18px] text-violet-300" />
-                            Overview
-                            <span className="ml-auto h-1.5 w-1.5 rounded-full bg-cyan-300" />
-                        </a>
-
-                        <button
-                            onClick={() => router.push("/mentor/interviewer/setup")}
-                            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm text-slate-400 transition hover:bg-white/[0.04] hover:text-white"
-                        >
-                            <Plus className="h-[18px] w-[18px]" />
-                            New Interview
-                        </button>
-
-                        <a
-                            href="#interview-history"
-                            className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-slate-400 transition hover:bg-white/[0.04] hover:text-white"
-                        >
-                            <History className="h-[18px] w-[18px]" />
-                            Interview History
-                        </a>
-
-                        <a
-                            href="#weakness-tracker"
-                            className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-slate-400 transition hover:bg-white/[0.04] hover:text-white"
-                        >
-                            <ChartNoAxesCombined className="h-[18px] w-[18px]" />
-                            My Progress
-                        </a>
-                    </nav>
-
-                    <div className="mt-auto">
-                        <div className="relative overflow-hidden rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-500/[0.13] to-cyan-500/[0.05] p-4">
-                            <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-violet-500/15 blur-2xl" />
-                            <Sparkles className="relative mb-3 h-6 w-6 text-violet-300" />
-                            <p className="relative text-sm font-semibold">
-                                Level up your skills
-                            </p>
-                            <p className="relative mt-2 text-xs leading-5 text-slate-400">
-                                Practice consistently and turn your weak areas into strengths.
-                            </p>
-                            <a
-                                href="#weakness-tracker"
-                                className="relative mt-4 flex items-center gap-1 text-xs font-semibold text-cyan-300"
-                            >
-                                View progress <ArrowUpRight className="h-3.5 w-3.5" />
-                            </a>
-                        </div>
-
-                        <p className="mt-5 text-center text-[10px] tracking-wide text-slate-600">
-                            LEARN · BUILD · IMPACT
-                        </p>
-                    </div>
-                </aside>
+                <InterviewerSidebar />
 
                 {/* Main content */}
                 <section className="min-w-0 flex-1 px-4 py-5 sm:px-7 sm:py-8 xl:px-10">

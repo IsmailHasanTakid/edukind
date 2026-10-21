@@ -10,6 +10,7 @@ import {
     BookOpen,
     Brain,
     Lightbulb,
+    Mic,
     CalendarDays,
     Sparkles,
     PanelLeftClose,
@@ -20,6 +21,8 @@ const mentorItems = [
     { name: "Ask AI", href: "/mentor/chat", icon: MessageCircle },
     { name: "Code", href: "/mentor/code", icon: Code2 },
     { name: "Learn", href: "/mentor/learn", icon: BookOpen },
+    { name: "Interview", href: "/mentor/interviewer", icon: Mic },
+
     { name: "Problem Solver", href: "/mentor/problem-solver", icon: Lightbulb },
     { name: "Study Planner", href: "/mentor/study-planner", icon: CalendarDays },
 ];

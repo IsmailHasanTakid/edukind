@@ -284,7 +284,7 @@ export default function DeenSidebar() {
             </button>
 
             {/* ডেস্কটপ Sidebar */}
-            <aside className="fixed inset-y-0 left-0 z-40 hidden w-[260px] flex-col overflow-y-auto border-r border-white/[0.08] bg-[#0B3025] lg:flex">
+            <aside className="fixed left-0 top-0 z-40 hidden h-dvh w-[260px] flex-col overflow-y-auto border-r border-white/[0.08] bg-[#0B3025] lg:top-[5.625rem] lg:flex lg:h-[calc(100dvh-5.625rem)]">
                 {sidebarContent}
             </aside>
 

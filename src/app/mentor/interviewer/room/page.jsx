@@ -980,7 +980,7 @@ export default function InterviewRoomPage() {
     }
 
     return (
-        <main className="min-h-screen overflow-hidden bg-[#070910] text-white">
+        <main className="min-h-screen overflow-x-clip bg-[#070910] text-white">
             <div className="pointer-events-none fixed inset-0 overflow-hidden">
                 <div className="absolute -left-40 top-20 h-96 w-96 rounded-full bg-violet-600/10 blur-[130px]" />
                 <div className="absolute -right-40 top-40 h-96 w-96 rounded-full bg-cyan-500/10 blur-[130px]" />

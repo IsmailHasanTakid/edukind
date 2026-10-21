@@ -13,7 +13,9 @@ function MentorChrome({ children }) {
         "/mentor/learn",
         "/mentor/code",
         "/mentor/problem-solver",
-
+        // The AI Interviewer pages bring their own sidebar.
+        "/mentor/interviewer",
+        "/mentor/interviewer/progress",
     ];
 
     const shouldHideSidebar = hideSidebarRoutes.includes(pathname);

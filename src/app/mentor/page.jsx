@@ -5,6 +5,7 @@ import {
     Brain,
     BriefcaseBusiness,
     CalendarCheck,
+    Mic,
     Code2,
     GraduationCap,
     Lightbulb,
@@ -68,6 +69,17 @@ const mentorFeatures = [
         accent: "blue",
         label: "SHAPE YOUR FUTURE",
     },
+    {
+        title: "AI Interviewer",
+        description:
+            "Master your next interview with AI-powered practice, adaptive questions, and personalized performance insights.",
+        href: "/mentor/interviewer",
+        icon: Mic,
+        accent: "blue",
+        label: "YOUR NEXT OPPORTUNITY STARTS HERE",
+    },
+
+
 ];
 
 const accentStyles = {
@@ -201,14 +213,23 @@ export default function MentorPage() {
                 </div>
 
                 {/* Feature cards */}
+
+                {/* Feature cards */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
                     {mentorFeatures.map((feature) => (
-                        <FeatureCard
+                        <div
                             key={feature.href}
-                            feature={feature}
-                        />
+                            className={
+                                feature.title === "AI Interviewer"
+                                    ? "sm:col-span-2 lg:col-span-3"
+                                    : ""
+                            }
+                        >
+                            <FeatureCard feature={feature} />
+                        </div>
                     ))}
                 </div>
+
 
                 {/* Footer */}
                 <footer className="mt-10 flex flex-col items-center justify-center gap-2 border-t border-white/[0.06] pt-6 text-center sm:flex-row sm:gap-3">

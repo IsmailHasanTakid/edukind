@@ -847,6 +847,8 @@ function toSummary(record) {
         grade: record.grade,
         gradeLabel: record.gradeLabel,
         performanceGrade: record.performanceGrade,
+        summary: record.summary,
+        summarySource: record.summarySource,
         questionCount: record.questions.length,
         plannedQuestionCount: record.config?.questionCount || 0,
         counts,
