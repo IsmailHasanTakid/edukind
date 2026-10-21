@@ -1,9 +1,11 @@
 
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+    ArrowRight,
     ArrowUpRight,
     AudioLines,
     BrainCircuit,
@@ -12,98 +14,202 @@ import {
     ChevronRight,
     Clock3,
     Code2,
-    GraduationCap,
     History,
     LayoutDashboard,
+    LoaderCircle,
     Mic,
     Plus,
     Sparkles,
     Target,
     TrendingUp,
     Trophy,
-    X,
+    Users,
     Zap,
 } from "lucide-react";
 
-const stats = [
-    {
-        label: "Total Interviews",
-        value: "12",
-        change: "+3 this week",
-        icon: History,
-        color: "text-cyan-300",
-        bg: "bg-cyan-400/10",
-    },
-    {
-        label: "Average Score",
-        value: "78%",
-        change: "+12% improvement",
-        icon: Target,
-        color: "text-violet-300",
-        bg: "bg-violet-400/10",
-    },
-    {
-        label: "Practice Hours",
-        value: "8.5h",
-        change: "Keep it going",
-        icon: Clock3,
-        color: "text-blue-300",
-        bg: "bg-blue-400/10",
-    },
-    {
-        label: "Skills Improved",
-        value: "06",
-        change: "Across 4 topics",
-        icon: TrendingUp,
-        color: "text-emerald-300",
-        bg: "bg-emerald-400/10",
-    },
-];
-
-const interviews = [
-    {
-        title: "React.js Technical Interview",
-        subtitle: "React.js · Intermediate",
-        date: "Today",
-        score: "84%",
-        status: "Completed",
+const TYPE_STYLES = {
+    Technical: {
         color: "text-cyan-300",
         bg: "bg-cyan-400/10",
         icon: Code2,
     },
-    {
-        title: "JavaScript Fundamentals",
-        subtitle: "JavaScript · Beginner",
-        date: "Yesterday",
-        score: "76%",
-        status: "Completed",
-        color: "text-amber-300",
-        bg: "bg-amber-400/10",
-        icon: BrainCircuit,
-    },
-    {
-        title: "Frontend Developer HR",
-        subtitle: "HR Interview · Intermediate",
-        date: "Oct 18",
-        score: "72%",
-        status: "Completed",
+    Coding: {
         color: "text-violet-300",
         bg: "bg-violet-400/10",
+        icon: BrainCircuit,
+    },
+    HR: {
+        color: "text-amber-300",
+        bg: "bg-amber-400/10",
         icon: BriefcaseBusiness,
     },
-];
+    Mixed: {
+        color: "text-emerald-300",
+        bg: "bg-emerald-400/10",
+        icon: Users,
+    },
+};
 
-const weaknesses = [
-    { name: "Asynchronous JavaScript", progress: 35, color: "bg-rose-400" },
-    { name: "React Performance", progress: 52, color: "bg-amber-400" },
-    { name: "Problem Explanation", progress: 68, color: "bg-violet-400" },
-];
+function aggregateWeakTopics(sessions) {
+    const topics = new Map();
 
-const activity = [32, 48, 38, 65, 52, 78, 58];
+    sessions.forEach((session) => {
+        (session.topicPerformance || []).forEach((topic) => {
+            const score = Number(topic.score);
+
+            if (!topic.topic || !Number.isFinite(score)) return;
+
+            if (!topics.has(topic.topic)) {
+                topics.set(topic.topic, { total: 0, count: 0 });
+            }
+
+            const entry = topics.get(topic.topic);
+            entry.total += score;
+            entry.count += 1;
+        });
+    });
+
+    return Array.from(topics.entries())
+        .map(([name, entry]) => ({
+            name,
+            progress: Math.round(entry.total / entry.count),
+        }))
+        .sort((a, b) => a.progress - b.progress)
+        .slice(0, 3);
+}
 
 export default function InterviewerPage() {
-    const [showSetupNotice, setShowSetupNotice] = useState(false);
     const router = useRouter();
+    const [sessions, setSessions] = useState([]);
+    const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+    const [historyError, setHistoryError] = useState("");
+    const [now, setNow] = useState(0);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        (async () => {
+            try {
+                const response = await fetch(
+                    "/api/interviewer/session?limit=100"
+                );
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error || "Interview history লোড করা যায়নি।"
+                    );
+                }
+
+                if (!cancelled) {
+                    setSessions(
+                        Array.isArray(data.interviews) ? data.interviews : []
+                    );
+                    setNow(Date.now());
+                }
+            } catch (error) {
+                if (!cancelled) {
+                    setHistoryError(
+                        error?.message || "Interview history লোড করা যায়নি।"
+                    );
+                }
+            } finally {
+                if (!cancelled) setIsHistoryLoading(false);
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    const totalInterviews = sessions.length;
+    const averageScore = totalInterviews
+        ? Math.round(
+            sessions.reduce(
+                (total, session) =>
+                    total + (Number(session.overallScore) || 0),
+                0
+            ) / totalInterviews
+        )
+        : 0;
+    const practiceHours = (
+        sessions.reduce(
+            (total, session) =>
+                total + (Number(session.config?.duration) || 0),
+            0
+        ) / 60
+    ).toFixed(1);
+    const topicCount = new Set(
+        sessions.flatMap((session) => session.config?.topics || [])
+    ).size;
+    const weekSessions = sessions.filter(
+        (session) =>
+            now - new Date(session.createdAt).getTime() <
+            7 * 24 * 60 * 60 * 1000 &&
+            now - new Date(session.createdAt).getTime() >= 0
+    ).length;
+    const recentSessions = sessions.slice(0, 6);
+    const weaknessTopics = aggregateWeakTopics(sessions);
+
+    const weekActivity = Array.from({ length: 7 }).map((_, index) => {
+        const day = new Date(now || 0);
+        day.setHours(0, 0, 0, 0);
+        day.setDate(day.getDate() - (6 - index));
+
+        const nextDay = new Date(day);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        return sessions.filter((session) => {
+            const created = new Date(session.createdAt);
+            return created >= day && created < nextDay;
+        }).length;
+    });
+    const maxActivity = Math.max(...weekActivity, 1);
+    const dayLabels = Array.from({ length: 7 }).map((_, index) => {
+        const day = new Date(now || 0);
+        day.setDate(day.getDate() - (6 - index));
+        return day
+            .toLocaleDateString("en-US", { weekday: "short" })
+            .slice(0, 1);
+    });
+
+    const stats = [
+        {
+            label: "Total Interviews",
+            value: String(totalInterviews).padStart(2, "0"),
+            change: `${weekSessions} this week`,
+            icon: History,
+            color: "text-cyan-300",
+            bg: "bg-cyan-400/10",
+        },
+        {
+            label: "Average Score",
+            value: `${averageScore}%`,
+            change: totalInterviews
+                ? "Across saved reports"
+                : "Complete one to begin",
+            icon: Target,
+            color: "text-violet-300",
+            bg: "bg-violet-400/10",
+        },
+        {
+            label: "Practice Hours",
+            value: `${practiceHours}h`,
+            change: "Total interview time",
+            icon: Clock3,
+            color: "text-blue-300",
+            bg: "bg-blue-400/10",
+        },
+        {
+            label: "Topics Practiced",
+            value: String(topicCount).padStart(2, "0"),
+            change: topicCount ? "Tracked from your setup" : "Choose topics next",
+            icon: TrendingUp,
+            color: "text-emerald-300",
+            bg: "bg-emerald-400/10",
+        },
+    ];
 
     return (
         <main className="min-h-screen overflow-hidden bg-[#080A12] text-white">
@@ -357,43 +463,127 @@ export default function InterviewerPage() {
                             </div>
 
                             <div className="space-y-3">
-                                {interviews.map((item) => {
-                                    const Icon = item.icon;
-
-                                    return (
-                                        <article
-                                            key={item.title}
-                                            className="group flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.015] p-3.5 transition hover:border-white/10 hover:bg-white/[0.035] sm:gap-4 sm:p-4"
+                                {isHistoryLoading ? (
+                                    <div className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.015] py-10 text-xs text-slate-500">
+                                        <LoaderCircle
+                                            size={16}
+                                            className="animate-spin"
+                                        />
+                                        Loading interview history...
+                                    </div>
+                                ) : historyError ? (
+                                    <div className="rounded-xl border border-rose-400/15 bg-rose-400/[0.05] p-4 text-sm leading-6 text-rose-300">
+                                        {historyError}
+                                    </div>
+                                ) : recentSessions.length === 0 ? (
+                                    <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.015] p-6 text-center">
+                                        <History
+                                            size={26}
+                                            className="mx-auto text-slate-600"
+                                        />
+                                        <p className="mt-3 text-sm font-medium text-slate-300">
+                                            এখনো কোনো completed interview নেই
+                                        </p>
+                                        <p className="mt-1 text-xs leading-5 text-slate-500">
+                                            প্রথম AI interview শেষ করলে এখানে
+                                            score ও report দেখা যাবে।
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                router.push(
+                                                    "/mentor/interviewer/setup"
+                                                )
+                                            }
+                                            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-500 px-4 py-2.5 text-xs font-semibold"
                                         >
-                                            <div
-                                                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${item.bg}`}
+                                            <Plus size={14} />
+                                            Start your first interview
+                                        </button>
+                                    </div>
+                                ) : (
+                                    recentSessions.map((session) => {
+                                        const style =
+                                            TYPE_STYLES[
+                                            session.config?.interviewType
+                                            ] || TYPE_STYLES.Technical;
+                                        const Icon = style.icon;
+                                        const score =
+                                            Number(session.overallScore) || 0;
+                                        const scoreTone =
+                                            score >= 80
+                                                ? "text-emerald-300"
+                                                : score >= 60
+                                                    ? "text-amber-300"
+                                                    : "text-rose-300";
+
+                                        return (
+                                            <Link
+                                                key={session.id}
+                                                href={`/mentor/interviewer/result/${session.id}`}
+                                                className="group flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.015] p-3.5 transition hover:border-white/10 hover:bg-white/[0.035] sm:gap-4 sm:p-4"
                                             >
-                                                <Icon className={`h-5 w-5 ${item.color}`} />
-                                            </div>
+                                                <div
+                                                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${style.bg}`}
+                                                >
+                                                    <Icon
+                                                        className={`h-5 w-5 ${style.color}`}
+                                                    />
+                                                </div>
 
-                                            <div className="min-w-0 flex-1">
-                                                <h4 className="truncate text-sm font-medium text-slate-200">
-                                                    {item.title}
-                                                </h4>
-                                                <p className="mt-1 truncate text-xs text-slate-500">
-                                                    {item.subtitle}
-                                                </p>
-                                                <p className="mt-2 text-[11px] text-slate-600">
-                                                    {item.date}
-                                                </p>
-                                            </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <h4 className="truncate text-sm font-medium text-slate-200">
+                                                        {session.config?.subject ||
+                                                            "Interview"}{" "}
+                                                        {session.config
+                                                            ?.interviewType ||
+                                                            "Practice"}{" "}
+                                                        Interview
+                                                    </h4>
+                                                    <p className="mt-1 truncate text-xs text-slate-500">
+                                                        {session.config
+                                                            ?.subject ||
+                                                            "Custom"}{" "}
+                                                        ·{" "}
+                                                        {session.config
+                                                            ?.difficulty ||
+                                                            "Intermediate"}{" "}
+                                                        ·{" "}
+                                                        {session.questionCount}{" "}
+                                                        questions
+                                                    </p>
+                                                    <p className="mt-2 text-[11px] text-slate-600">
+                                                        {new Date(
+                                                            session.createdAt
+                                                        ).toLocaleDateString(
+                                                            undefined,
+                                                            {
+                                                                month: "short",
+                                                                day: "numeric",
+                                                                year: "numeric",
+                                                            }
+                                                        )}
+                                                    </p>
+                                                </div>
 
-                                            <div className="shrink-0 text-right">
-                                                <p className={`text-lg font-semibold ${item.color}`}>
-                                                    {item.score}
-                                                </p>
-                                                <span className="mt-1 block text-[10px] text-slate-500">
-                                                    {item.status}
-                                                </span>
-                                            </div>
-                                        </article>
-                                    );
-                                })}
+                                                <div className="shrink-0 text-right">
+                                                    <p
+                                                        className={`text-lg font-semibold ${scoreTone}`}
+                                                    >
+                                                        {score}%
+                                                    </p>
+                                                    <span className="mt-1 flex items-center justify-end gap-1 text-[10px] text-slate-500">
+                                                        View report
+                                                        <ArrowRight
+                                                            size={11}
+                                                            className="transition group-hover:translate-x-0.5"
+                                                        />
+                                                    </span>
+                                                </div>
+                                            </Link>
+                                        );
+                                    })
+                                )}
                             </div>
 
                             <button
@@ -422,11 +612,16 @@ export default function InterviewerPage() {
                             <div className="mt-6 flex items-end justify-between gap-4">
                                 <div>
                                     <p className="text-4xl font-semibold tracking-tight">
-                                        78<span className="text-xl text-slate-400">%</span>
+                                        {averageScore}
+                                        <span className="text-xl text-slate-400">
+                                            %
+                                        </span>
                                     </p>
                                     <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-300">
                                         <TrendingUp className="h-3.5 w-3.5" />
-                                        +12% from last month
+                                        {totalInterviews
+                                            ? `Based on ${totalInterviews} saved report${totalInterviews === 1 ? "" : "s"}`
+                                            : "Complete an interview to see your score"}
                                     </p>
                                 </div>
                                 <span className="rounded-lg border border-white/[0.08] px-3 py-2 text-[11px] text-slate-400">
@@ -435,22 +630,34 @@ export default function InterviewerPage() {
                             </div>
 
                             <div className="mt-8 flex h-36 items-end justify-between gap-2">
-                                {activity.map((height, index) => (
+                                {weekActivity.map((count, index) => (
                                     <div
                                         key={index}
                                         className="flex h-full flex-1 flex-col items-center justify-end gap-2"
                                     >
                                         <div className="flex w-full flex-1 items-end">
                                             <div
-                                                className={`w-full rounded-t-lg transition-all duration-300 ${index === 5
+                                                className={`w-full rounded-t-lg transition-all duration-300 ${index === 6
                                                     ? "bg-gradient-to-t from-violet-600 to-cyan-300"
                                                     : "bg-gradient-to-t from-violet-600/30 to-violet-300/50"
                                                     }`}
-                                                style={{ height: `${height}%` }}
+                                                style={{
+                                                    height: `${Math.max(
+                                                        count
+                                                            ? Math.round(
+                                                                (count /
+                                                                    maxActivity) *
+                                                                100
+                                                            )
+                                                            : 4,
+                                                        4
+                                                    )}%`,
+                                                }}
+                                                title={`${count} interview${count === 1 ? "" : "s"}`}
                                             />
                                         </div>
                                         <span className="text-[10px] text-slate-600">
-                                            {["M", "T", "W", "T", "F", "S", "S"][index]}
+                                            {dayLabels[index]}
                                         </span>
                                     </div>
                                 ))}
@@ -458,14 +665,28 @@ export default function InterviewerPage() {
 
                             <div className="mt-6 border-t border-white/[0.07] pt-5">
                                 <div className="flex items-center justify-between text-xs">
-                                    <span className="text-slate-400">Weekly goal</span>
-                                    <span className="font-medium text-slate-200">3 / 5 sessions</span>
+                                    <span className="text-slate-400">
+                                        Weekly goal
+                                    </span>
+                                    <span className="font-medium text-slate-200">
+                                        {Math.min(weekSessions, 5)} / 5 sessions
+                                    </span>
                                 </div>
                                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
-                                    <div className="h-full w-3/5 rounded-full bg-gradient-to-r from-violet-500 to-cyan-300" />
+                                    <div
+                                        className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-300 transition-all duration-500"
+                                        style={{
+                                            width: `${Math.min(
+                                                (weekSessions / 5) * 100,
+                                                100
+                                            )}%`,
+                                        }}
+                                    />
                                 </div>
                                 <p className="mt-3 text-[11px] text-slate-500">
-                                    Two more sessions to reach your weekly goal.
+                                    {weekSessions >= 5
+                                        ? "Weekly goal complete. Keep the momentum going."
+                                        : `${5 - weekSessions} more session${5 - weekSessions === 1 ? "" : "s"} to reach your weekly goal.`}
                                 </p>
                             </div>
                         </section>
@@ -489,36 +710,56 @@ export default function InterviewerPage() {
                                 </div>
                             </div>
                             <span className="rounded-full border border-rose-400/20 bg-rose-400/[0.06] px-3 py-1.5 text-xs text-rose-300">
-                                3 areas to improve
+                                {weaknessTopics.length
+                                    ? `${weaknessTopics.length} areas to improve`
+                                    : "No topic data yet"}
                             </span>
                         </div>
 
-                        <div className="grid gap-5 md:grid-cols-3">
-                            {weaknesses.map((item) => (
-                                <div
-                                    key={item.name}
-                                    className="rounded-xl border border-white/[0.06] bg-white/[0.015] p-4"
-                                >
-                                    <div className="flex items-start justify-between gap-3">
-                                        <p className="text-sm font-medium leading-5 text-slate-300">
-                                            {item.name}
-                                        </p>
-                                        <span className="text-xs text-slate-500">
-                                            {item.progress}%
-                                        </span>
-                                    </div>
-                                    <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                        {weaknessTopics.length ? (
+                            <div className="grid gap-5 md:grid-cols-3">
+                                {weaknessTopics.map((item) => {
+                                    const color =
+                                        item.progress < 40
+                                            ? "bg-rose-400"
+                                            : item.progress < 60
+                                                ? "bg-amber-400"
+                                                : "bg-violet-400";
+
+                                    return (
                                         <div
-                                            className={`h-full rounded-full ${item.color}`}
-                                            style={{ width: `${item.progress}%` }}
-                                        />
-                                    </div>
-                                    <p className="mt-3 text-[11px] text-slate-500">
-                                        Practice recommended
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
+                                            key={item.name}
+                                            className="rounded-xl border border-white/[0.06] bg-white/[0.015] p-4"
+                                        >
+                                            <div className="flex items-start justify-between gap-3">
+                                                <p className="text-sm font-medium leading-5 text-slate-300">
+                                                    {item.name}
+                                                </p>
+                                                <span className="text-xs text-slate-500">
+                                                    {item.progress}%
+                                                </span>
+                                            </div>
+                                            <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                                                <div
+                                                    className={`h-full rounded-full ${color}`}
+                                                    style={{
+                                                        width: `${item.progress}%`,
+                                                    }}
+                                                />
+                                            </div>
+                                            <p className="mt-3 text-[11px] text-slate-500">
+                                                Practice recommended
+                                            </p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <p className="rounded-xl border border-dashed border-white/10 bg-white/[0.015] p-5 text-sm leading-6 text-slate-500">
+                                একাধিক interview শেষ করলে topic-wise score থেকে
+                                focus area দেখানো হবে।
+                            </p>
+                        )}
                     </section>
 
                     {/* Motivation */}
@@ -548,60 +789,6 @@ export default function InterviewerPage() {
                 </section>
             </div>
 
-            {/* Next-step notice */}
-            {showSetupNotice && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
-                    onClick={() => setShowSetupNotice(false)}
-                >
-                    <div
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="setup-notice-title"
-                        className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#111421] p-6 shadow-2xl shadow-violet-950/30"
-                        onClick={(event) => event.stopPropagation()}
-                    >
-                        <button
-                            onClick={() => setShowSetupNotice(false)}
-                            aria-label="Close"
-                            className="absolute right-4 top-4 rounded-lg p-2 text-slate-400 transition hover:bg-white/5 hover:text-white"
-                        >
-                            <X className="h-4 w-4" />
-                        </button>
-
-                        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-violet-400/20 bg-violet-400/10">
-                            <Sparkles className="h-6 w-6 text-violet-300" />
-                        </div>
-
-                        <h3 id="setup-notice-title" className="text-xl font-semibold">
-                            Your next interview starts here
-                        </h3>
-                        <p className="mt-3 text-sm leading-6 text-slate-400">
-                            The dashboard is ready. Next, we will build the interview setup
-                            form so you can choose any topic, difficulty, language, duration,
-                            and voice or text mode.
-                        </p>
-
-                        <div className="mt-5 rounded-xl border border-cyan-300/10 bg-cyan-300/[0.04] p-4">
-                            <p className="flex items-center gap-2 text-sm font-medium text-cyan-200">
-                                <Mic className="h-4 w-4" />
-                                Voice interview support
-                            </p>
-                            <p className="mt-2 text-xs leading-5 text-slate-500">
-                                Microphone access and AI voice integration will be added in
-                                the upcoming steps.
-                            </p>
-                        </div>
-
-                        <button
-                            onClick={() => setShowSetupNotice(false)}
-                            className="mt-6 w-full rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 px-4 py-3 text-sm font-semibold transition hover:brightness-110"
-                        >
-                            Continue
-                        </button>
-                    </div>
-                </div>
-            )}
         </main>
     );
 }

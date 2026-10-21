@@ -1,7 +1,7 @@
 
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
     ArrowLeft,
@@ -18,6 +18,11 @@ import {
     Terminal,
     Users,
 } from "lucide-react";
+import { normalizeInterviewConfig } from "@/lib/interview";
+
+const RETAKE_CONFIG_KEY = "edukindInterviewRetakeConfig";
+const QUESTION_COUNT_OPTIONS = ["5", "10", "15", "20"];
+const DURATION_OPTIONS = [5, 15, 30, 60];
 
 const subjects = [
     "JavaScript",
@@ -200,7 +205,7 @@ export default function InterviewSetupPage() {
     const [interviewType, setInterviewType] = useState("Technical");
     const [subject, setSubject] = useState("React");
     const [customSubject, setCustomSubject] = useState("");
-    const [topicMode, setTopicMode] = useState("custom");
+    const [topicMode, setTopicMode] = useState("suggested");
     const [selectedTopics, setSelectedTopics] = useState([
         "useState",
         "useEffect",
@@ -215,7 +220,73 @@ export default function InterviewSetupPage() {
     const [duration, setDuration] = useState(15);
     const [questionCount, setQuestionCount] = useState("10");
     const [error, setError] = useState("");
-    const [submittedConfig, setSubmittedConfig] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        let saved = null;
+
+        try {
+            saved = sessionStorage.getItem(RETAKE_CONFIG_KEY);
+        } catch {
+            return;
+        }
+
+        if (!saved) return;
+
+        try {
+            sessionStorage.removeItem(RETAKE_CONFIG_KEY);
+        } catch {
+            // Ignore browser storage errors.
+        }
+
+        let retakeConfig;
+
+        try {
+            retakeConfig = normalizeInterviewConfig(JSON.parse(saved));
+        } catch {
+            return;
+        }
+
+        const knownSubject = subjects.includes(retakeConfig.subject);
+
+        // The retake configuration lives in sessionStorage (an external
+        // store), so it can only be read after mount. Applying it to the form
+        // here is the intended synchronization, not a render-derived update.
+        /* eslint-disable react-hooks/set-state-in-effect */
+        setInterviewType(retakeConfig.interviewType);
+        setSubject(
+            knownSubject ? retakeConfig.subject : "Other / Custom Subject"
+        );
+        setCustomSubject(knownSubject ? "" : retakeConfig.subject);
+
+        const knownTopics = suggestedTopics[retakeConfig.subject] || [];
+        const hasUnknownSuggestedTopic = retakeConfig.topics.some(
+            (topic) => !knownTopics.includes(topic)
+        );
+
+        setTopicMode(
+            retakeConfig.topicMode === "suggested" &&
+                (!knownSubject || hasUnknownSuggestedTopic)
+                ? "custom"
+                : retakeConfig.topicMode
+        );
+        setSelectedTopics(retakeConfig.topics);
+        setCustomTopics(retakeConfig.topics.join(", "));
+        setDifficulty(retakeConfig.difficulty);
+        setLanguage(retakeConfig.language);
+        setMode(retakeConfig.mode);
+        setDuration(
+            DURATION_OPTIONS.includes(retakeConfig.duration)
+                ? retakeConfig.duration
+                : 15
+        );
+        setQuestionCount(
+            QUESTION_COUNT_OPTIONS.includes(String(retakeConfig.questionCount))
+                ? String(retakeConfig.questionCount)
+                : "10"
+        );
+        /* eslint-enable react-hooks/set-state-in-effect */
+    }, []);
 
     const topicList = suggestedTopics[subject] || [];
     const finalSubject =
@@ -234,10 +305,11 @@ export default function InterviewSetupPage() {
     function handleSubmit(event) {
         event.preventDefault();
         setError("");
-        setSubmittedConfig(null);
+        setIsSubmitting(true);
 
         if (!finalSubject) {
             setError("Please enter a subject.");
+            setIsSubmitting(false);
             return;
         }
 
@@ -254,26 +326,47 @@ export default function InterviewSetupPage() {
 
         if (topicMode !== "all" && topics.length === 0) {
             setError("Please select or enter at least one topic.");
+            setIsSubmitting(false);
             return;
         }
 
-        const config = {
-            interviewType,
-            subject: finalSubject,
-            topicMode,
-            topics,
-            difficulty,
-            language,
-            mode,
-            duration,
-            questionCount: Number(questionCount),
-        };
+        let config;
 
-        setSubmittedConfig(config);
-        sessionStorage.setItem(
-            "edukindInterviewConfig",
-            JSON.stringify(config)
-        );
+        try {
+            config = normalizeInterviewConfig({
+                interviewType,
+                subject: finalSubject,
+                topicMode,
+                topics,
+                difficulty,
+                language,
+                mode,
+                duration,
+                questionCount: Number(questionCount),
+            });
+        } catch (configError) {
+            setError(
+                configError?.message ||
+                "Interview configuration ঠিক নেই। আবার চেষ্টা করো।"
+            );
+            setIsSubmitting(false);
+            return;
+        }
+
+        try {
+            sessionStorage.setItem(
+                "edukindInterviewConfig",
+                JSON.stringify(config)
+            );
+            sessionStorage.removeItem("edukindInterviewResultId");
+            sessionStorage.removeItem("edukindInterviewSessionId");
+        } catch {
+            setError(
+                "Browser storage ব্যবহার করা যাচ্ছে না। Private mode বন্ধ করে আবার চেষ্টা করো।"
+            );
+            setIsSubmitting(false);
+            return;
+        }
 
         router.push("/mentor/interviewer/room");
     }
@@ -586,6 +679,12 @@ export default function InterviewSetupPage() {
                                     </OptionButton>
                                 ))}
                             </div>
+
+                            <p className="mt-4 text-xs leading-5 text-slate-500">
+                                বাংলা voice browser-এ installed voice-এর উপর নির্ভর
+                                করে। বাংলা voice না থাকলে English voice দিয়ে বাংলা
+                                পড়ানো হবে না; তুমি লিখে interview চালিয়ে যেতে পারবে।
+                            </p>
                         </div>
 
                         <div className="rounded-2xl border border-white/[0.09] bg-[#0D101B]/90 p-5 sm:p-6">
@@ -632,7 +731,8 @@ export default function InterviewSetupPage() {
                                 <div className="mt-4 rounded-xl border border-cyan-300/10 bg-cyan-300/[0.04] p-3">
                                     <p className="flex items-center gap-2 text-xs text-cyan-200">
                                         <AudioLines className="h-4 w-4" />
-                                        Microphone access will be needed
+                                        Microphone permission চাইবে। না পেলেও text
+                                        answer সবসময় কাজ করবে।
                                     </p>
                                 </div>
                             )}
@@ -697,8 +797,9 @@ export default function InterviewSetupPage() {
                                 <option value="20">20 questions</option>
                             </select>
                             <p className="mt-2 text-xs text-slate-500">
-                                The final number of questions may depend on your session
-                                duration and follow-up questions.
+                                Question count ঠিক করে দেবে interview কখন শেষ হবে।
+                                Session length শুধু তোমার practice plan ও report-এ
+                                দেখানো হবে।
                             </p>
                         </div>
                     </section>
@@ -721,59 +822,25 @@ export default function InterviewSetupPage() {
                                     Your interview, your rules.
                                 </p>
                                 <p className="mt-2 max-w-lg text-xs leading-6 text-slate-400">
-                                    Your choices will shape the interview. AI question
-                                    generation and live voice interaction will be connected
-                                    in the next implementation step.
+                                    Your choices will shape a live AI interview. Questions
+                                    are generated one at a time and your answers are
+                                    evaluated at the end.
                                 </p>
                             </div>
 
                             <button
                                 type="submit"
-                                className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 px-6 py-3.5 text-sm font-semibold shadow-lg shadow-violet-900/20 transition hover:-translate-y-0.5 hover:brightness-110"
+                                disabled={isSubmitting}
+                                className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 px-6 py-3.5 text-sm font-semibold shadow-lg shadow-violet-900/20 transition hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                Prepare Interview
+                                {isSubmitting
+                                    ? "Preparing..."
+                                    : "Prepare Interview"}
                                 <ArrowRight className="h-4 w-4" />
                             </button>
                         </div>
                     </section>
                 </form>
-
-                {submittedConfig && (
-                    <section
-                        aria-live="polite"
-                        className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.05] p-5 sm:p-6"
-                    >
-                        <div className="flex items-start gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-400/10">
-                                <Check className="h-5 w-5 text-emerald-300" />
-                            </div>
-                            <div className="min-w-0">
-                                <h2 className="font-semibold text-emerald-200">
-                                    Your configuration is ready
-                                </h2>
-                                <p className="mt-2 text-sm leading-6 text-slate-400">
-                                    {submittedConfig.interviewType} interview ·{" "}
-                                    {submittedConfig.subject} · {submittedConfig.difficulty} ·{" "}
-                                    {submittedConfig.language} · {submittedConfig.mode} ·{" "}
-                                    {submittedConfig.duration} minutes
-                                </p>
-
-                                <p className="mt-3 text-xs leading-5 text-slate-500">
-                                    Topics:{" "}
-                                    {submittedConfig.topicMode === "all"
-                                        ? "All topics"
-                                        : submittedConfig.topics.join(", ")}
-                                </p>
-
-                                <p className="mt-3 text-sm leading-6 text-slate-400">
-                                    Setup form is working. The next step is to build the
-                                    interview room and connect the selected configuration to
-                                    the AI engine. No live interview has started yet.
-                                </p>
-                            </div>
-                        </div>
-                    </section>
-                )}
 
                 <footer className="py-8 text-center text-[11px] tracking-wide text-slate-600">
                     EDUKIND · LEARN · BUILD · IMPACT

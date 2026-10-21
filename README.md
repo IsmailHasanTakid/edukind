@@ -20,6 +20,25 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## AI Interviewer persistence
+
+The AI Interviewer stores each session in a local JSON file so questions,
+answers, and reports survive refreshes:
+
+- Default location: `.data/interviews.json` (gitignored).
+- Override the directory with `INTERVIEW_STORE_DIR=/absolute/path`.
+- `GROQ_API_KEY` must be set in `.env.local` for question generation,
+  evaluation, and summaries.
+
+The JSON store is suitable for local development and a single Node process.
+It is **not** durable on serverless hosts such as Vercel, where the filesystem
+is ephemeral and instances do not share files. A production deployment needs a
+shared database or object store for interview sessions and reports.
+
+There is no authentication in this project. A report URL contains an
+unguessable UUID, but anyone with the URL (or access to the history endpoint)
+can read that report. Do not treat report URLs as per-user authorization.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

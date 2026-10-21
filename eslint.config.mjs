@@ -10,6 +10,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated model/runtime assets are not application source and can
+    // exceed ESLint's heap when the full repository is linted.
+    "public/**",
+    ".data/**",
   ]),
 ]);
 

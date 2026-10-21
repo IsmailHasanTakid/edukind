@@ -1,4 +1,5 @@
 
+import { Suspense } from "react";
 import "./globals.css";
 import HideNavbar from "@/components/HideNavbar";
 
@@ -11,7 +12,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen flex flex-col">
-        <HideNavbar />
+        <Suspense fallback={null}>
+          <HideNavbar />
+        </Suspense>
         <main className="flex-1 px-12">
           {children}
         </main>

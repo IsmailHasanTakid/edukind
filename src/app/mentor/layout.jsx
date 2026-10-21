@@ -1,10 +1,11 @@
 
 "use client";
 
+import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import MentorSidebar from "@/components/MentorSidebar";
 
-export default function MentorLayout({ children }) {
+function MentorChrome({ children }) {
     const pathname = usePathname();
 
     const hideSidebarRoutes = [
@@ -25,5 +26,19 @@ export default function MentorLayout({ children }) {
                 {children}
             </main>
         </div>
+    );
+}
+
+export default function MentorLayout({ children }) {
+    return (
+        <Suspense
+            fallback={
+                <div className="flex h-[calc(100dvh-5.5rem)] items-center justify-center bg-[#0B1120] text-white lg:h-[calc(100dvh-5.625rem)]">
+                    <span className="text-sm text-slate-400">Loading...</span>
+                </div>
+            }
+        >
+            <MentorChrome>{children}</MentorChrome>
+        </Suspense>
     );
 }
