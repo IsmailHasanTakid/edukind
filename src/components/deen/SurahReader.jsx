@@ -22,6 +22,7 @@ export default function SurahReader({
     ayahs,
     showBismillah,
     reciter,
+    onAyahChange,
 }) {
     const audioRef = useRef(null);
     const currentRef = useRef(null);
@@ -44,6 +45,7 @@ export default function SurahReader({
                 const parsed = JSON.parse(saved);
 
                 if (Array.isArray(parsed)) {
+                    // eslint-disable-next-line react-hooks/set-state-in-effect
                     setSurahBookmarks(parsed);
                 }
             }
@@ -63,6 +65,7 @@ export default function SurahReader({
                 const parsed = JSON.parse(saved);
 
                 if (Array.isArray(parsed)) {
+                    // eslint-disable-next-line react-hooks/set-state-in-effect
                     setBookmarks(parsed);
                 }
             }
@@ -154,6 +157,7 @@ export default function SurahReader({
             currentRef.current = index;
             setCurrent(index);
             setError(false);
+            onAyahChange?.(ayah, index);
 
             audio.src = ayah.audio;
             audio.defaultPlaybackRate = rateRef.current;
@@ -164,7 +168,7 @@ export default function SurahReader({
                 .then(() => setPlaying(true))
                 .catch(handlePlayError);
         },
-        [ayahs, handlePlayError]
+        [ayahs, handlePlayError, onAyahChange]
     );
 
     useEffect(() => {

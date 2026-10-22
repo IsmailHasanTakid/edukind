@@ -677,7 +677,9 @@ function SurahCard({ item, onDone, onUndo, onDelete, completed }) {
                     }`}
             />
 
-            <div className="relative flex items-start gap-4">
+            <Link
+                href={`/deen-islam/quran/${info.number}`}
+                className="relative flex items-start gap-4 cursor-pointer">
                 <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-[#DCE8DE] bg-gradient-to-br from-[#F1F7F0] to-[#E5F0E5] text-[#176344] transition group-hover:border-[#B6D2BE]">
                     <BookOpen size={23} strokeWidth={1.7} />
                     <span className="absolute -bottom-2 -right-2 flex h-6 min-w-6 items-center justify-center rounded-lg border-2 border-white bg-[#14553D] px-1 text-[10px] font-bold text-white">
@@ -699,11 +701,14 @@ function SurahCard({ item, onDone, onUndo, onDelete, completed }) {
                         )}
                     </div>
 
-                    <p className="mt-1 text-xs font-medium tracking-wide text-[#89978D]">
+                    <div
+                        href={`/deen-islam/quran/${info.number}`}
+                        className="mt-1 text-xs font-medium tracking-wide text-[#89978D]">
                         {info.english}
-                    </p>
+                    </div>
 
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <div
+                        className="mt-3 flex flex-wrap items-center gap-2">
                         <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#F1F6F1] px-2.5 py-1.5 text-xs text-[#53685B]">
                             <BookOpen size={13} />
                             {bn(info.ayahs)}টি আয়াত
@@ -722,16 +727,18 @@ function SurahCard({ item, onDone, onUndo, onDelete, completed }) {
                 >
                     {info.arabic}
                 </div>
-            </div>
+            </Link>
 
-            <div className="relative mt-5 rounded-xl border border-[#E8EEE7] bg-[#F8FAF6] p-4">
+            <Link
+                href={`/deen-islam/quran/${info.number}`}
+                className="relative mt-5 rounded-xl border border-[#E8EEE7] bg-[#F8FAF6] p-4">
                 <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#A17C32]">
                     সূরা পরিচিতি
                 </p>
                 <p className="text-sm leading-7 text-[#637267]">
                     {info.summary}
                 </p>
-            </div>
+            </Link>
 
             <div className="relative mt-5 flex flex-col gap-3 border-t border-[#EDF1EC] pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <Link

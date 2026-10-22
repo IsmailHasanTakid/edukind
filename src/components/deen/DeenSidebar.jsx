@@ -43,6 +43,9 @@ export default function DeenSidebar() {
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const sectionKey = getSectionKey(pathname);
+    const isHadithSection =
+        pathname === "/deen-islam/hadith" ||
+        pathname.startsWith("/deen-islam/hadith/");
     const section = SECTIONS[sectionKey] ?? null;
     const SectionIcon = section?.icon;
     const footer = section?.footer ?? DEFAULT_FOOTER;
@@ -157,11 +160,7 @@ export default function DeenSidebar() {
                                             {item.label}
                                         </span>
 
-                                        {item.comingSoon ? (
-                                            <span className="text-[9px] text-emerald-100/35">
-                                                SOON
-                                            </span>
-                                        ) : active ? (
+                                        {active ? (
                                             <ChevronRight
                                                 size={15}
                                                 className="text-[#D8BC79]"
@@ -284,7 +283,7 @@ export default function DeenSidebar() {
             </button>
 
             {/* ডেস্কটপ Sidebar */}
-            <aside className="fixed left-0 top-0 z-40 hidden h-dvh w-[260px] flex-col overflow-y-auto border-r border-white/[0.08] bg-[#0B3025] lg:top-[5.625rem] lg:flex lg:h-[calc(100dvh-5.625rem)]">
+            <aside className={`${isHadithSection ? "page-scrollbar-hidden " : ""}fixed left-0 top-0 z-40 hidden h-dvh w-[260px] flex-col overflow-y-auto border-r border-white/[0.08] bg-[#0B3025] lg:top-[5.625rem] lg:flex lg:h-[calc(100dvh-5.625rem)]`}>
                 {sidebarContent}
             </aside>
 

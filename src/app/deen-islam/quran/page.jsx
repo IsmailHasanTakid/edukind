@@ -74,7 +74,7 @@ export default async function QuranLibraryPage() {
                         </Link>
                         <ChevronRight size={14} aria-hidden="true" />
                         <span className="text-[#E5CC91]">
-                            কুরআন লাইব্রেরি
+                            আল-কুরআন লাইব্রেরি
                         </span>
                     </nav>
 
@@ -94,7 +94,7 @@ export default async function QuranLibraryPage() {
                             <h1
                                 className={`${bnSerif.className} mt-3 text-3xl font-bold leading-[1.3] tracking-tight text-[#FFF9E9] sm:text-4xl lg:text-5xl`}
                             >
-                                কুরআন
+                                আল-কুরআন
                                 <span className="block text-[#E5CC91]">
                                     লাইব্রেরি
                                 </span>

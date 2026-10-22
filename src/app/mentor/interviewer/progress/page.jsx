@@ -19,7 +19,6 @@ import {
     TrendingUp,
     Trophy,
 } from "lucide-react";
-import InterviewerSidebar from "@/components/interviewer/InterviewerSidebar";
 
 const RESULT_BASE_PATH = "/mentor/interviewer/result";
 const START_INTERVIEW_PATH = "/mentor/interviewer/setup";
@@ -311,8 +310,6 @@ export default function InterviewerProgressPage() {
             </div>
 
             <div className="relative flex min-h-screen w-full flex-col lg:flex-row">
-                <InterviewerSidebar />
-
                 <section className="min-w-0 flex-1 px-4 py-5 sm:px-7 sm:py-8 xl:px-10">
                     <header className="mb-8 flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3 lg:hidden">

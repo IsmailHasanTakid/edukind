@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
     ArrowUpRight,
     BrainCircuit,
@@ -11,6 +12,9 @@ import {
     Plus,
     Sparkles,
 } from "lucide-react";
+
+const OVERVIEW_PATH = "/mentor/interviewer";
+const HISTORY_HASH = "#interview-history";
 
 const BASE_ITEM_CLASS =
     "flex shrink-0 items-center gap-3 whitespace-nowrap rounded-xl px-3 py-3 text-sm transition";
@@ -25,12 +29,38 @@ function navClass(isActive, extra = "") {
     } ${extra}`;
 }
 
+function matchesPath(pathname, href) {
+    return pathname === href || Boolean(pathname?.startsWith(`${href}/`));
+}
+
 export default function InterviewerSidebar() {
     const pathname = usePathname();
-    const router = useRouter();
+    const [hash, setHash] = useState("");
 
-    const isOverview = pathname === "/mentor/interviewer";
-    const isProgress = pathname?.startsWith("/mentor/interviewer/progress");
+    useEffect(() => {
+        const syncHash = () => setHash(window.location.hash);
+
+        syncHash();
+        window.addEventListener("hashchange", syncHash);
+        window.addEventListener("popstate", syncHash);
+
+        return () => {
+            window.removeEventListener("hashchange", syncHash);
+            window.removeEventListener("popstate", syncHash);
+        };
+    }, [pathname]);
+
+    const isHistory =
+        pathname === OVERVIEW_PATH
+            ? hash === HISTORY_HASH
+            : matchesPath(pathname, `${OVERVIEW_PATH}/history`);
+    const isOverview = pathname === OVERVIEW_PATH && !isHistory;
+    const isNewInterview =
+        matchesPath(pathname, `${OVERVIEW_PATH}/setup`) ||
+        matchesPath(pathname, `${OVERVIEW_PATH}/room`);
+    const isProgress =
+        matchesPath(pathname, `${OVERVIEW_PATH}/progress`) ||
+        matchesPath(pathname, `${OVERVIEW_PATH}/result`);
 
     return (
         <aside className="flex w-full shrink-0 flex-col overflow-hidden border-b border-white/[0.07] bg-[#0A0C15]/80 lg:sticky lg:top-0 lg:h-[calc(100dvh-5.625rem)] lg:w-[250px] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:border-b-0 lg:border-r lg:px-5 lg:py-7">
@@ -57,7 +87,8 @@ export default function InterviewerSidebar() {
 
             <nav className="flex gap-1 overflow-x-auto px-3 py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:block lg:space-y-1 lg:overflow-visible lg:px-0 lg:py-0">
                 <Link
-                    href="/mentor/interviewer"
+                    href={OVERVIEW_PATH}
+                    onClick={() => setHash("")}
                     aria-current={isOverview ? "page" : undefined}
                     className={navClass(isOverview)}
                 >
@@ -68,28 +99,33 @@ export default function InterviewerSidebar() {
                     )}
                 </Link>
 
-                <button
-                    type="button"
-                    onClick={() => router.push("/mentor/interviewer/setup")}
-                    className={navClass(
-                        false,
-                        "text-left lg:w-full"
-                    )}
+                <Link
+                    href={`${OVERVIEW_PATH}/setup`}
+                    aria-current={isNewInterview ? "page" : undefined}
+                    className={navClass(isNewInterview, "lg:w-full")}
                 >
                     <Plus className="h-[18px] w-[18px]" />
                     New Interview
-                </button>
-
-                <Link
-                    href="/mentor/interviewer#interview-history"
-                    className={navClass(false)}
-                >
-                    <History className="h-[18px] w-[18px]" />
-                    Interview History
+                    {isNewInterview && (
+                        <span className="ml-auto h-1.5 w-1.5 rounded-full bg-cyan-300" />
+                    )}
                 </Link>
 
                 <Link
-                    href="/mentor/interviewer/progress"
+                    href={`${OVERVIEW_PATH}${HISTORY_HASH}`}
+                    onClick={() => setHash(HISTORY_HASH)}
+                    aria-current={isHistory ? "page" : undefined}
+                    className={navClass(isHistory)}
+                >
+                    <History className="h-[18px] w-[18px]" />
+                    Interview History
+                    {isHistory && (
+                        <span className="ml-auto h-1.5 w-1.5 rounded-full bg-cyan-300" />
+                    )}
+                </Link>
+
+                <Link
+                    href={`${OVERVIEW_PATH}/progress`}
                     aria-current={isProgress ? "page" : undefined}
                     className={navClass(isProgress)}
                 >

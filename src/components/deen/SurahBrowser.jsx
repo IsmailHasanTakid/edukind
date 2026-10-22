@@ -38,7 +38,7 @@ const normalizeArabic = (value = "") =>
         .replace(/ى/g, "ي")
         .trim();
 
-export default function SurahBrowser({ surahs = [] }) {
+export default function SurahBrowser({ surahs = [], hrefBuilder }) {
     const [query, setQuery] = useState("");
     const [filter, setFilter] = useState("all");
 
@@ -212,7 +212,11 @@ export default function SurahBrowser({ surahs = [] }) {
                         return (
                             <Link
                                 key={surah.number}
-                                href={`/deen-islam/quran/${surah.number}`}
+                                href={
+                                    typeof hrefBuilder === "function"
+                                        ? hrefBuilder(surah)
+                                        : `/deen-islam/quran/${surah.number}`
+                                }
                                 aria-label={`${surah.englishName}, সূরা ${bn(surah.number)}`}
                                 className="group relative flex min-w-0 items-center gap-3 overflow-hidden rounded-2xl border border-[#E5EAE1] bg-white p-3.5 shadow-[0_3px_14px_rgba(29,67,43,0.035)] transition duration-300 hover:-translate-y-1 hover:border-[#CDBB87]/65 hover:shadow-[0_14px_32px_rgba(29,67,43,0.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#39865D] focus-visible:ring-offset-2 sm:gap-4 sm:p-4"
                             >

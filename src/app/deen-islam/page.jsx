@@ -47,10 +47,10 @@ const chips = [
 const quickCards = [
     { title: "কুরআন", desc: "আরবি, অনুবাদ, তাফসির", href: "/deen-islam/quran", icon: BookOpen, color: "from-[#1F8A5B] to-[#13694A]" },
     { title: "হাদিস", desc: "প্রামাণিক সংগ্রহ ও ব্যাখ্যা", href: "/deen-islam/hadith", icon: ScrollText, color: "from-[#DDB04A] to-[#B8862A]" },
-    { title: "শিখি ইসলাম", desc: "কোর্স ও লেসন", href: "/deen-islam/learn", icon: GraduationCap, color: "from-[#7C5FD6] to-[#5A3FB0]" },
-    { title: "দোয়া ও ইবাদত", desc: "দোয়া, নামাজ, রোজা", href: "/deen-islam/duas", icon: Heart, color: "from-[#17A6A0] to-[#0E7C77]" },
-    { title: "AI সহকারী", desc: "প্রশ্ন করুন, জানুন, শিখুন", href: "/deen-islam/assistant", icon: BrainCircuit, color: "from-[#EE5A5F] to-[#C93A40]" },
-    { title: "নামাজের সময়", desc: "লোকেশন ভিত্তিক সময়", href: "/deen-islam/prayer-times", icon: CalendarDays, color: "from-[#5B68DB] to-[#3F4BB5]" },
+    { title: "শিখি ইসলাম", desc: "কোর্স ও লেসন", href: "/deen-islam/learning", icon: GraduationCap, color: "from-[#7C5FD6] to-[#5A3FB0]" },
+    { title: "দোয়া ও ইবাদত", desc: "দোয়া, নামাজ, রোজা", href: "/deen-islam/daily#duas", icon: Heart, color: "from-[#17A6A0] to-[#0E7C77]" },
+    { title: "AI সহকারী", desc: "প্রশ্ন করুন, জানুন, শিখুন", href: "/deen-islam/learning/assistant", icon: BrainCircuit, color: "from-[#EE5A5F] to-[#C93A40]" },
+    { title: "নামাজের সময়", desc: "লোকেশন ভিত্তিক সময়", href: "/deen-islam/daily#prayer-times", icon: CalendarDays, color: "from-[#5B68DB] to-[#3F4BB5]" },
 ];
 
 const exploreCards = [
@@ -77,7 +77,7 @@ const exploreCards = [
     {
         title: "লার্নিং একাডেমি",
         desc: "কোর্স, লেসন, কুইজ ও অগ্রগতি",
-        href: "/deen-islam/learn",
+        href: "/deen-islam/learning",
         image: "/deen/learning.jpg",
         fallback: "linear-gradient(135deg,#3B2A78,#7B5FD0)",
         card: "bg-[#F1EEFA] border-[#DDD6F2]",
@@ -87,7 +87,7 @@ const exploreCards = [
     {
         title: "AI ইসলামিক সহকারী",
         desc: "প্রশ্ন করুন, রেফারেন্সসহ উত্তর পান",
-        href: "/deen-islam/assistant",
+        href: "/deen-islam/ask-ai",
         image: "/deen/ai.jpg",
         fallback: "linear-gradient(135deg,#0B5C6E,#2AA7BD)",
         card: "bg-[#EAF6F8] border-[#CBE6EC]",
@@ -117,7 +117,7 @@ const exploreCards = [
     {
         title: "নামাজের সময় ও ক্যালেন্ডার",
         desc: "লোকেশন ভিত্তিক সময় ও হিজরি ক্যালেন্ডার",
-        href: "/deen-islam/prayer-times",
+        href: "/deen-islam/daily#prayer-times",
         icon: CalendarDays,
         fallback: "linear-gradient(135deg,#0B3B2D,#14614A)",
         iconWrap: "border-[#D9C99A]/40 text-[#E8D9A8]",
@@ -489,7 +489,7 @@ export default function DeenIslamPage() {
                         </div>
 
                         <Link
-                            href="/deen-islam/learn"
+                            href="/deen-islam/learning"
                             className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#16B072] to-[#0D8453] px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 transition hover:brightness-110"
                         >
                             এখনই শুরু করুন <ArrowRight size={17} />

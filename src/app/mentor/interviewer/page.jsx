@@ -25,7 +25,6 @@ import {
     Users,
     Zap,
 } from "lucide-react";
-import InterviewerSidebar from "@/components/interviewer/InterviewerSidebar";
 
 const TYPE_STYLES = {
     Technical: {
@@ -219,9 +218,6 @@ export default function InterviewerPage() {
             </div>
 
             <div className="relative flex min-h-screen w-full flex-col lg:flex-row">
-                {/* Sidebar */}
-                <InterviewerSidebar />
-
                 {/* Main content */}
                 <section className="min-w-0 flex-1 px-4 py-5 sm:px-7 sm:py-8 xl:px-10">
                     {/* Header */}

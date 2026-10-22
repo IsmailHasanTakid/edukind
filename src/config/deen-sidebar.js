@@ -71,24 +71,23 @@ export const SECTIONS = {
                 href: "/deen-islam/hadith",
                 icon: List,
                 exact: true,
+                alsoMatch:
+                    /^\/deen-islam\/hadith\/(?!search(?:\/|$)|topics(?:\/|$)|bookmarks(?:\/|$))[^/]+$/,
             },
             {
                 label: "হাদিস খুঁজুন",
                 href: "/deen-islam/hadith/search",
                 icon: Search,
-                comingSoon: true,
             },
             {
                 label: "বিষয়ভিত্তিক",
                 href: "/deen-islam/hadith/topics",
                 icon: Tag,
-                comingSoon: true,
             },
             {
                 label: "বুকমার্ক",
                 href: "/deen-islam/hadith/bookmarks",
                 icon: Bookmark,
-                comingSoon: true,
             },
         ],
         footer: {
@@ -97,12 +96,18 @@ export const SECTIONS = {
         },
     },
 
-    "ai-assistant": {
+    "ask-ai": {
         title: "AI Islamic Assistant",
-        subtitle: "প্রশ্ন করুন, সূত্রসহ জানুন",
+        subtitle: "কুরআন ও হাদিসের যাচাইকৃত সূত্রসহ উত্তর",
         icon: Sparkles,
-        comingSoon: true,
-        items: [infoItem("ai-assistant")],
+        items: [
+            {
+                label: "ইসলাম সম্পর্কে জানুন",
+                href: "/deen-islam/ask-ai",
+                icon: Sparkles,
+                exact: true,
+            },
+        ],
     },
 
     "ai-lessons": {
@@ -123,10 +128,41 @@ export const SECTIONS = {
 
     history: {
         title: "ইসলামের ইতিহাস",
-        subtitle: "সিরাত ও গুরুত্বপূর্ণ ঘটনা",
+        subtitle: "নবী-রাসূলদের জীবনী ও কুরআনি ঘটনা",
         icon: History,
-        comingSoon: true,
-        items: [infoItem("history")],
+        items: [
+            {
+                label: "নবী-রাসূলদের জীবনী",
+                href: "/deen-islam/history",
+                icon: LibraryBig,
+                exact: true,
+                alsoMatch: /^\/deen-islam\/history\/[^/]+\/?$/,
+            },
+            {
+                label: "কুরআনি ঘটনা",
+                href: "/deen-islam/history#quranic-events",
+                icon: Sparkles,
+            },
+            {
+                label: "বিষয়ভিত্তিক পাঠ",
+                href: "/deen-islam/history#themes",
+                icon: Tag,
+            },
+            {
+                label: "শিক্ষা ও চিন্তা",
+                href: "/deen-islam/history#lessons",
+                icon: GraduationCap,
+            },
+            {
+                label: "সূত্র ও নীতি",
+                href: "/deen-islam/history#sources",
+                icon: Info,
+            },
+        ],
+        footer: {
+            title: "সূত্র মিলিয়ে পড়ুন",
+            text: "কুরআনের বর্ণনা ও সীরাত-বিবরণ আলাদা করে দেখুন।",
+        },
     },
 };
 

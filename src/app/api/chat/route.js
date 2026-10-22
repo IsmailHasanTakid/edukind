@@ -1,5 +1,9 @@
 import Groq from "groq-sdk";
 import { NextResponse } from "next/server";
+import {
+    getCourseById,
+    getCourseLesson,
+} from "@/lib/learning/courses";
 
 const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY,
@@ -105,6 +109,55 @@ CURRENT MODE: PROBLEM SOLVER (learn by thinking, not by copying)
 - When the learner attempts a step, check it honestly and correct gently.
 - Keep each reply short so the learner stays active.
 `,
+    "quran-academy": `
+CURRENT MODE: QURAN ACADEMY LESSON ASSISTANT
+
+Your job is to help the learner understand the predefined lesson supplied in the
+AUTHORITATIVE LESSON CONTEXT below.
+
+RULES:
+- Treat the supplied course, module, lesson, objectives, notes, and knowledge
+  check as the authoritative curriculum.
+- Never invent a new course, replace the lesson sequence, or silently add new
+  religious curriculum.
+- Explain the current lesson in simple language. If the learner writes in Bangla
+  script or Banglish, reply in clear Bangla script.
+- Give examples only when they genuinely clarify the lesson. Do not invent
+  Quranic verses, hadith, Arabic text, translations, or religious rulings.
+- Clearly distinguish an educational explanation from verified source material.
+  If a requested source is not in the supplied context, say that it should be
+  verified rather than fabricating it.
+- You may summarise the lesson, give additional practice questions, explain a
+  quiz answer, recommend revision, or test the learner with one small question.
+- Do not claim to hear, assess, or certify pronunciation. Recommend a qualified
+  teacher or reliable audio for recitation and articulation.
+- Do not issue fatwas or binding religious rulings. Refer legal or theological
+  questions to qualified scholarship.
+- Keep the learner oriented: connect your answer back to the current lesson and
+  one concrete next step.
+`,
+    "quran-study": `
+CURRENT MODE: QURAN ACADEMY GENERAL STUDY ASSISTANT
+
+You support learners who are using the predefined Quran Learning Academy. No
+specific lesson is loaded in this mode.
+
+RULES:
+- You may explain study methods, terminology, how to practise, how to revise,
+  and how to use the Academy.
+- For help with a specific lesson, quiz, or course objective, tell the learner to
+  open that lesson and use the Lesson Assistant there.
+- Do not create, replace, or extend the Academy curriculum.
+- Do not invent Quranic verses, hadith, Arabic text, translations, statistics,
+  or religious rulings.
+- Do not claim to hear or certify recitation. Recommend reliable audio and a
+  qualified teacher for pronunciation feedback.
+- Do not issue fatwas or binding religious rulings. Refer legal or theological
+  questions to qualified scholarship.
+- Clearly distinguish general educational explanation from verified source
+  material.
+`,
+
     career: `
 CURRENT MODE: EDUKIND CAREER INTELLIGENCE
 You are a thoughtful, practical AI career advisor and learning roadmap coach.
@@ -177,9 +230,64 @@ function errorResponse(error) {
     return NextResponse.json({ error: message }, { status });
 }
 
+function buildAcademyContext(courseId, lessonId) {
+    const course = getCourseById(courseId);
+    const lesson = course ? getCourseLesson(course, lessonId) : null;
+
+    if (!course || !lesson) return null;
+
+    const sections = lesson.sections
+        .map((section) => {
+            const paragraphs = (section.paragraphs || []).join(" ");
+            const points = (section.points || []).join("; ");
+
+            return `### ${section.heading}\n${paragraphs}${
+                points ? `\nKey points: ${points}` : ""
+            }`;
+        })
+        .join("\n\n");
+
+    const quiz = (lesson.quiz || [])
+        .map((question, index) => {
+            return `${index + 1}. ${question.question}\nOptions: ${question.options.join(
+                " | "
+            )}\nCorrect option: ${question.options[question.answer]}\nWhy: ${
+                question.explanation
+            }`;
+        })
+        .join("\n");
+
+    return `
+
+AUTHORITATIVE LESSON CONTEXT
+Course: ${course.title}
+Level: ${course.level}
+Module: ${lesson.moduleTitle}
+Lesson: ${lesson.title}
+Lesson type: ${lesson.type}
+Summary: ${lesson.summary}
+Objectives: ${lesson.objectives.join("; ")}
+Completion criteria: ${lesson.completionNote || course.completionCriteria}
+
+Lesson notes:
+${sections}
+
+Exercise:
+${lesson.exercise?.title || "No written exercise"} - ${
+        lesson.exercise?.instructions || "Use the lesson practice guidance."
+    }
+
+Knowledge check:
+${quiz || "No knowledge check for this lesson."}
+
+Source note:
+${course.sourceNote}
+`;
+}
+
 export async function POST(request) {
     try {
-        const { messages, mode } = await request.json();
+        const { messages, mode, courseId, lessonId } = await request.json();
 
         if (!Array.isArray(messages) || messages.length === 0) {
             return NextResponse.json(
@@ -189,7 +297,22 @@ export async function POST(request) {
         }
 
         const safeMode = Object.hasOwn(MODE_PROMPTS, mode) ? mode : "chat";
-        const systemPrompt = BASE_PROMPT + MODE_PROMPTS[safeMode];
+        let systemPrompt = BASE_PROMPT + MODE_PROMPTS[safeMode];
+
+        if (safeMode === "quran-academy") {
+            const context = buildAcademyContext(courseId, lessonId);
+
+            if (!context) {
+                return NextResponse.json(
+                    {
+                        error: "A valid course and lesson are required for the Academy assistant.",
+                    },
+                    { status: 400 }
+                );
+            }
+
+            systemPrompt += context;
+        }
 
         const chatMessages = messages.map((message) => {
             if (

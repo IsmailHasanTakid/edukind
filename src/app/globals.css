@@ -12,3 +12,31 @@ body {
   background-attachment: fixed;
   color: #e4e4e7;
 }
+
+/* Hide only the browser window (root) scrollbar; scrolling still works. */
+html {
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* legacy Edge / IE */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;              /* Chrome, Edge, Safari */
+  width: 0;
+  height: 0;
+}
+
+/*
+ * Page-level content areas that scroll instead of the window.
+ * Applied per element so inner scrollable containers keep their scrollbars.
+ */
+.page-scrollbar-hidden {
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* legacy Edge / IE */
+}
+
+.page-scrollbar-hidden::-webkit-scrollbar {
+  display: none;              /* Chrome, Edge, Safari */
+  width: 0;
+  height: 0;
+}
