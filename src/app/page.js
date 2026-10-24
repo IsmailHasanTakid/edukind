@@ -1,11 +1,12 @@
 import Image from "next/image";
-import Hero from "@/components/home/Hero"
+
 import EcosystemShowcase from "@/components/ecosystem/EcosystemShowcase";
+import HeroSection from "@/components/home/Hero";
 
 export default function Home() {
   return (
     <div >
-      <Hero />
+      <HeroSection />
       <EcosystemShowcase />
     </div>
   );
