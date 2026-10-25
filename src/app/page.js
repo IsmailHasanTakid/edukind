@@ -1,13 +1,13 @@
-import Image from "next/image";
-
 import EcosystemShowcase from "@/components/ecosystem/EcosystemShowcase";
 import HeroSection from "@/components/home/Hero";
+import MentorPreview from "@/components/home/MentorPreview";
 
 export default function Home() {
   return (
-    <div >
+    <div>
       <HeroSection />
       <EcosystemShowcase />
+      <MentorPreview />
     </div>
   );
 }

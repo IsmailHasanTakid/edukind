@@ -1,4 +1,3 @@
-
 import { Suspense } from "react";
 import "./globals.css";
 import HideNavbar from "@/components/HideNavbar";
@@ -11,7 +10,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen flex flex-col">
+      <body className="min-h-screen flex flex-col bg-[#050714]">
         <Suspense fallback={null}>
           <HideNavbar />
         </Suspense>
