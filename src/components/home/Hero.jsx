@@ -250,33 +250,21 @@ export default function HeroSection() {
 
     useEffect(() => {
         const element = sectionRef.current;
-
         if (!element) return;
 
         const reduceMotion = window.matchMedia(
             "(prefers-reduced-motion: reduce)"
         ).matches;
-
         if (reduceMotion) return;
 
         let raf = 0;
 
         function onMove(event) {
             const rect = element.getBoundingClientRect();
-
             cancelAnimationFrame(raf);
-
             raf = requestAnimationFrame(() => {
-                element.style.setProperty(
-                    "--mx",
-                    `${event.clientX - rect.left}px`
-                );
-
-                element.style.setProperty(
-                    "--my",
-                    `${event.clientY - rect.top}px`
-                );
-
+                element.style.setProperty("--mx", `${event.clientX - rect.left}px`);
+                element.style.setProperty("--my", `${event.clientY - rect.top}px`);
                 element.style.setProperty("--spot", "1");
             });
         }
@@ -304,28 +292,19 @@ export default function HeroSection() {
             {/* 1. Midnight base */}
             <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 -top-20 -bottom-40 -z-20 bg-[#080A12]"
+                className="pointer-events-none absolute inset-x-0 -top-20 -bottom-32 -z-20 bg-[#080A12]"
             />
 
-            {/* 2. Dark, controlled aurora */}
+            {/* 2. Aurora */}
             <div
                 aria-hidden="true"
-                className="hero-aurora pointer-events-none absolute inset-x-0 -top-20 -bottom-40 -z-10 overflow-hidden"
+                className="hero-aurora pointer-events-none absolute inset-x-0 -top-20 -bottom-32 -z-10 overflow-hidden"
             >
-                {/* Indigo */}
-                <div className="aurora aurora-indigo absolute -right-[8%] -top-[12%] h-[520px] w-[520px] rounded-full" />
-
-                {/* Violet */}
-                <div className="aurora aurora-violet absolute left-[22%] top-[5%] h-[480px] w-[480px] rounded-full" />
-
-                {/* Teal */}
-                <div className="aurora aurora-teal absolute -left-[12%] top-[35%] h-[460px] w-[460px] rounded-full" />
-
-                {/* Rose */}
-                <div className="aurora aurora-rose absolute right-[12%] top-[40%] h-[350px] w-[350px] rounded-full" />
-
-                {/* Ice blue */}
-                <div className="aurora aurora-blue absolute bottom-[0%] left-[38%] h-[380px] w-[380px] rounded-full" />
+                <div className="aurora aurora-indigo absolute -right-[8%] -top-[12%] h-[440px] w-[440px] rounded-full" />
+                <div className="aurora aurora-violet absolute left-[22%] top-[5%] h-[400px] w-[400px] rounded-full" />
+                <div className="aurora aurora-teal absolute -left-[12%] top-[35%] h-[380px] w-[380px] rounded-full" />
+                <div className="aurora aurora-rose absolute right-[12%] top-[40%] h-[300px] w-[300px] rounded-full" />
+                <div className="aurora aurora-blue absolute bottom-[0%] left-[38%] h-[320px] w-[320px] rounded-full" />
             </div>
 
             {/* 3. Subtle grid */}
@@ -335,7 +314,7 @@ export default function HeroSection() {
                 style={{
                     backgroundImage:
                         "linear-gradient(rgba(190,195,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(190,195,255,0.035) 1px, transparent 1px)",
-                    backgroundSize: "68px 68px",
+                    backgroundSize: "56px 56px",
                     WebkitMaskImage:
                         "radial-gradient(ellipse 75% 65% at 48% 35%, black 5%, transparent 100%)",
                     maskImage:
@@ -350,41 +329,37 @@ export default function HeroSection() {
                 style={{
                     opacity: "var(--spot, 0)",
                     background:
-                        "radial-gradient(420px circle at var(--mx, 70%) var(--my, 35%), rgba(139,92,246,0.07), transparent 70%)",
+                        "radial-gradient(420px circle at var(--mx, 70%) var(--my, 35%), rgba(139,92,246,0.08), transparent 70%)",
                 }}
             />
 
-            {/* 5. Cinematic image on the right */}
+            {/* 5. Cinematic image */}
             <div
-                className="hero-art pointer-events-none absolute -top-12 right-[-10%] z-0 h-[calc(100%+3rem)] w-[85%]"
+                className="hero-art pointer-events-none absolute -top-8 right-[-10%] z-0 h-[calc(100%+2rem)] w-[85%]"
                 aria-hidden="true"
             >
                 <div className="hero-art-fade absolute inset-0">
                     <Image
-                        src="/images/hero-illustration.png"
+                        src="/images/hero-illustration2.png"
                         alt=""
                         fill
                         priority
-                        sizes="(min-width: 1280px) 76vw, (min-width: 1024px) 76vw, 100vw"
-                        className="select-none object-cover object-[80%_25%] scale-90"
+                        sizes="(min-width: 1024px) 76vw, 100vw"
+                        className="select-none object-cover object-[80%_25%] scale-70"
                         draggable={false}
                     />
                 </div>
-
-                {/* Dark overlay: protects text readability */}
                 <div className="absolute inset-0 bg-gradient-to-r from-[#080A12] via-[#080A12]/65 via-30% to-transparent" />
-
-                {/* Soft cinematic vignette */}
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_72%_45%,transparent_20%,rgba(8,10,18,0.20)_72%,#080A12_100%)]" />
             </div>
 
-            {/* 6. Gentle bottom transition */}
+            {/* 6. Bottom glow */}
             <div
                 aria-hidden="true"
                 className="hero-bottom-glow pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[35%]"
             />
 
-            {/* 7. Floating particles */}
+            {/* 7. Particles */}
             <HeroConstellation hostRef={sectionRef} />
 
             <style>{`
@@ -392,74 +367,30 @@ export default function HeroSection() {
                     --mx: 70%;
                     --my: 30%;
                     --spot: 0;
-                    clip-path: inset(0 0 -260px 0);
+                    clip-path: inset(0 0 -200px 0);
                     background: #080A12;
                 }
 
                 .hero-aurora {
-                    -webkit-mask-image: linear-gradient(
-                        to bottom,
-                        #000 0%,
-                        #000 55%,
-                        transparent 100%
-                    );
-                    mask-image: linear-gradient(
-                        to bottom,
-                        #000 0%,
-                        #000 55%,
-                        transparent 100%
-                    );
+                    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+                    mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
                 }
 
                 .aurora {
-                    filter: blur(125px);
+                    filter: blur(115px);
                     opacity: 0.16;
                     will-change: transform;
                     animation: aurora-float 26s ease-in-out infinite;
                 }
-
-                .aurora-indigo {
-                    background: #4338CA;
-                    opacity: 0.21;
-                }
-
-                .aurora-violet {
-                    background: #7C3AED;
-                    opacity: 0.17;
-                    animation-delay: -6s;
-                }
-
-                .aurora-teal {
-                    background: #0F766E;
-                    opacity: 0.16;
-                    animation-delay: -11s;
-                }
-
-                .aurora-rose {
-                    background: #9F315F;
-                    opacity: 0.12;
-                    animation-delay: -4s;
-                }
-
-                .aurora-blue {
-                    background: #7DD3FC;
-                    opacity: 0.08;
-                    animation-delay: -15s;
-                }
+                .aurora-indigo { background: #4338CA; opacity: 0.21; }
+                .aurora-violet { background: #7C3AED; opacity: 0.17; animation-delay: -6s; }
+                .aurora-teal   { background: #0F766E; opacity: 0.16; animation-delay: -11s; }
+                .aurora-rose   { background: #9F315F; opacity: 0.12; animation-delay: -4s; }
+                .aurora-blue   { background: #7DD3FC; opacity: 0.08; animation-delay: -15s; }
 
                 .hero-art-fade {
-                    -webkit-mask-image: linear-gradient(
-                        to bottom,
-                        #000 0%,
-                        #000 52%,
-                        transparent 100%
-                    );
-                    mask-image: linear-gradient(
-                        to bottom,
-                        #000 0%,
-                        #000 52%,
-                        transparent 100%
-                    );
+                    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+                    mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
                 }
 
                 .hero-bottom-glow {
@@ -473,12 +404,8 @@ export default function HeroSection() {
                 }
 
                 @keyframes aurora-float {
-                    0%, 100% {
-                        transform: translate3d(0, 0, 0) scale(1);
-                    }
-                    50% {
-                        transform: translate3d(3%, -4%, 0) scale(1.08);
-                    }
+                    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+                    50% { transform: translate3d(3%, -4%, 0) scale(1.08); }
                 }
 
                 @keyframes bottom-breathe {
@@ -487,14 +414,8 @@ export default function HeroSection() {
                 }
 
                 @keyframes hero-rise {
-                    from {
-                        opacity: 0;
-                        transform: translateY(18px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
+                    from { opacity: 0; transform: translateY(16px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
 
                 .hero-item {
@@ -512,35 +433,25 @@ export default function HeroSection() {
                     animation: hero-shimmer 9s linear infinite;
                 }
 
-                .hero-dot {
-                    animation: hero-dot-pulse 2s ease-out infinite;
-                }
+                .hero-dot { animation: hero-dot-pulse 2s ease-out infinite; }
 
                 @keyframes hero-dot-pulse {
-                    0% {
-                        box-shadow: 0 0 0 0 rgba(167,139,250,0.45);
-                    }
-                    100% {
-                        box-shadow: 0 0 0 8px rgba(167,139,250,0);
-                    }
+                    0% { box-shadow: 0 0 0 0 rgba(167,139,250,0.45); }
+                    100% { box-shadow: 0 0 0 7px rgba(167,139,250,0); }
+                }
+
+                /* Premium: headline এর নিচে পাতলা glow line */
+                .hero-line {
+                    height: 1px;
+                    width: 72px;
+                    background: linear-gradient(90deg, rgba(167,139,250,0.9), transparent);
+                    box-shadow: 0 0 14px rgba(167,139,250,0.6);
                 }
 
                 @media (min-width: 1024px) {
                     .hero-art {
-                        -webkit-mask-image: linear-gradient(
-                            to right,
-                            transparent 0%,
-                            rgba(0,0,0,0.3) 12%,
-                            rgba(0,0,0,0.8) 35%,
-                            #000 58%
-                        );
-                        mask-image: linear-gradient(
-                            to right,
-                            transparent 0%,
-                            rgba(0,0,0,0.3) 12%,
-                            rgba(0,0,0,0.8) 35%,
-                            #000 58%
-                        );
+                        -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 12%, rgba(0,0,0,0.8) 35%, #000 58%);
+                        mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 12%, rgba(0,0,0,0.8) 35%, #000 58%);
                     }
                 }
 
@@ -548,50 +459,23 @@ export default function HeroSection() {
                     .hero-art {
                         top: 0;
                         bottom: auto;
-                        height: 560px;
+                        height: 440px;
                         opacity: 0.42;
-                        -webkit-mask-image: linear-gradient(
-                            to bottom,
-                            #000 0%,
-                            rgba(0,0,0,0.8) 30%,
-                            transparent 100%
-                        );
-                        mask-image: linear-gradient(
-                            to bottom,
-                            #000 0%,
-                            rgba(0,0,0,0.8) 30%,
-                            transparent 100%
-                        );
+                        -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.8) 30%, transparent 100%);
+                        mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.8) 30%, transparent 100%);
                     }
-
                     .hero-art > div:nth-child(2) {
-                        background: linear-gradient(
-                            to right,
-                            rgba(8,10,18,0.8),
-                            rgba(8,10,18,0.15)
-                        );
+                        background: linear-gradient(to right, rgba(8,10,18,0.8), rgba(8,10,18,0.15));
                     }
                 }
 
                 @media (max-width: 639px) {
-                    .hero-art {
-                        height: 440px;
-                        right: -20%;
-                        width: 110%;
-                        opacity: 0.34;
-                    }
-
-                    .aurora {
-                        filter: blur(95px);
-                    }
+                    .hero-art { height: 360px; right: -20%; width: 110%; opacity: 0.34; }
+                    .aurora { filter: blur(90px); }
                 }
 
                 @media (prefers-reduced-motion: reduce) {
-                    .hero-item,
-                    .aurora,
-                    .hero-shimmer,
-                    .hero-dot,
-                    .hero-bottom-glow {
+                    .hero-item, .aurora, .hero-shimmer, .hero-dot, .hero-bottom-glow {
                         animation: none !important;
                     }
                 }
@@ -599,78 +483,59 @@ export default function HeroSection() {
 
             {/* Main content */}
             <div className="px-12">
-                <div className="relative z-10 mx-auto flex min-h-[760px] w-full max-w-[1760px] flex-col justify-start px-5 pb-10 pt-10 sm:px-10 lg:min-h-[800px] lg:px-[5%] lg:py-14 xl:min-h-[850px]">
-                    <div className="max-w-[720px]">
+                <div className="relative z-10 mx-auto flex min-h-[540px] w-full max-w-[1760px] flex-col justify-start px-5 pb-8 pt-8 sm:px-10 lg:min-h-[580px] lg:px-[5%] lg:py-10 xl:min-h-[610px]">
+                    <div className="max-w-[620px]">
                         {/* Badge */}
                         <div
-                            className="hero-item inline-flex items-center gap-3 rounded-full border border-violet-300/15 bg-[#11121F]/75 py-2 pl-3 pr-5 text-[11px] font-medium uppercase tracking-[0.17em] shadow-[0_8px_35px_rgba(0,0,0,0.20)] backdrop-blur-xl sm:text-xs"
+                            className="hero-item inline-flex items-center gap-2.5 rounded-full border border-violet-300/15 bg-[#11121F]/75 py-1.5 pl-2.5 pr-4 text-[10px] font-medium uppercase tracking-[0.18em] shadow-[0_8px_30px_rgba(0,0,0,0.20)] backdrop-blur-xl"
                             style={{ "--i": 0 }}
                         >
-                            <span
-                                className="hero-dot h-2 w-2 rounded-full bg-violet-300"
-                                aria-hidden="true"
-                            />
-
-                            <Sparkles
-                                size={17}
-                                className="text-violet-300"
-                                aria-hidden="true"
-                            />
-
+                            <span className="hero-dot h-1.5 w-1.5 rounded-full bg-violet-300" aria-hidden="true" />
+                            <Sparkles size={13} className="text-violet-300" aria-hidden="true" />
                             <span>
-                                <span className="font-semibold text-white">
-                                    AI Powered
-                                </span>{" "}
-                                <span className="text-slate-400">
-                                    Learning Platform
-                                </span>
+                                <span className="font-semibold text-white">AI Powered</span>{" "}
+                                <span className="text-slate-400">Learning Platform</span>
                             </span>
                         </div>
 
                         {/* Headline */}
                         <h1
-                            className="hero-item mt-5 text-[clamp(2.8rem,6.5vw,5.7rem)] font-semibold leading-[1.02] tracking-[-0.055em]"
+                            className="hero-item mt-4 text-[clamp(2rem,4.4vw,3.9rem)] font-semibold leading-[1.05] tracking-[-0.05em]"
                             style={{ "--i": 1 }}
                         >
-                            <span className="block text-[#F4F4F8]">
-                                Learn. Grow.
-                            </span>
-
-                            <span className="hero-shimmer block bg-gradient-to-r from-indigo-300 via-violet-300 to-sky-300 bg-clip-text pb-2 text-transparent">
+                            <span className="block text-[#F4F4F8]">Learn. Grow.</span>
+                            <span className="hero-shimmer block bg-gradient-to-r from-indigo-300 via-violet-300 to-sky-300 bg-clip-text pb-1.5 text-transparent">
                                 Make an Impact.
                             </span>
                         </h1>
 
+                        <div className="hero-item hero-line mt-3" style={{ "--i": 2 }} aria-hidden="true" />
+
                         {/* Description */}
                         <p
-                            className="hero-item mt-4 max-w-[550px] text-[15px] leading-8 text-slate-300 sm:text-[17px] sm:leading-9 lg:mt-5"
+                            className="hero-item mt-4 max-w-[470px] text-[13.5px] leading-7 text-slate-400 sm:text-[15px] sm:leading-[1.75rem]"
                             style={{ "--i": 2 }}
                         >
-                            EDUKIND হলো তোমার এক-জায়গার শেখার সঙ্গী — AI
-                            Mentor, ইসলামিক জ্ঞান, দক্ষতা উন্নয়ন এবং মানবতার
-                            জন্য কাজ করার সুযোগ।
+                            EDUKIND হলো তোমার এক-জায়গার শেখার সঙ্গী — AI Mentor, ইসলামিক
+                            জ্ঞান, দক্ষতা উন্নয়ন এবং মানবতার জন্য কাজ করার সুযোগ।
                         </p>
 
                         {/* CTA buttons */}
                         <div
-                            className="hero-item mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 lg:mt-10"
+                            className="hero-item mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3.5 lg:mt-7"
                             style={{ "--i": 3 }}
                         >
                             <Link
                                 href={PRIMARY_HREF}
-                                className="group relative inline-flex h-[54px] items-center justify-center gap-3 overflow-hidden rounded-full border border-violet-300/25 bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 px-8 text-[15px] font-semibold text-white shadow-[0_12px_40px_-15px_rgba(124,58,237,0.75)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_48px_-12px_rgba(124,58,237,0.75)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 sm:h-[58px]"
+                                className="group relative inline-flex h-[46px] items-center justify-center gap-2.5 overflow-hidden rounded-full border border-violet-300/25 bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 px-7 text-[14px] font-semibold text-white shadow-[0_10px_34px_-14px_rgba(124,58,237,0.75)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_42px_-12px_rgba(124,58,237,0.75)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 sm:h-[50px]"
                             >
                                 <span
                                     aria-hidden="true"
                                     className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full"
                                 />
-
-                                <span className="relative">
-                                    Start Learning
-                                </span>
-
+                                <span className="relative">Start Learning</span>
                                 <ArrowRight
-                                    size={19}
+                                    size={17}
                                     className="relative transition-transform duration-300 group-hover:translate-x-1"
                                     aria-hidden="true"
                                 />
@@ -678,16 +543,11 @@ export default function HeroSection() {
 
                             <Link
                                 href={SECONDARY_HREF}
-                                className="group inline-flex h-[54px] items-center justify-center gap-3 rounded-full border border-white/[0.12] bg-[#11121F]/65 px-7 text-[15px] font-medium text-slate-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-violet-300/30 hover:bg-[#19172A]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 sm:h-[58px]"
+                                className="group inline-flex h-[46px] items-center justify-center gap-2.5 rounded-full border border-white/[0.12] bg-[#11121F]/65 px-6 text-[14px] font-medium text-slate-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-violet-300/30 hover:bg-[#19172A]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 sm:h-[50px]"
                             >
-                                <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] transition group-hover:border-violet-300/25 group-hover:bg-violet-400/10">
-                                    <Play
-                                        size={13}
-                                        className="ml-0.5 fill-current"
-                                        aria-hidden="true"
-                                    />
+                                <span className="flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] transition group-hover:border-violet-300/25 group-hover:bg-violet-400/10">
+                                    <Play size={11} className="ml-0.5 fill-current" aria-hidden="true" />
                                 </span>
-
                                 Watch How It Works
                             </Link>
                         </div>
@@ -695,7 +555,7 @@ export default function HeroSection() {
 
                     {/* Feature strip */}
                     <ul
-                        className="hero-item mt-12 grid grid-cols-2 gap-x-5 gap-y-7 sm:mt-14 sm:grid-cols-4 lg:mt-20 lg:max-w-[800px] lg:gap-0"
+                        className="hero-item mt-9 grid grid-cols-2 gap-x-4 gap-y-5 sm:mt-10 sm:grid-cols-4 lg:mt-12 lg:max-w-[680px] lg:gap-0"
                         style={{ "--i": 4 }}
                     >
                         {features.map((feature, index) => {
@@ -706,23 +566,23 @@ export default function HeroSection() {
                                     key={feature.id}
                                     className={
                                         index === 0
-                                            ? "lg:pl-0 lg:pr-5"
-                                            : "lg:border-l lg:border-white/[0.10] lg:pl-6 lg:pr-5"
+                                            ? "lg:pl-0 lg:pr-4"
+                                            : "lg:border-l lg:border-white/[0.08] lg:pl-5 lg:pr-4"
                                     }
                                 >
                                     <Link
                                         href={feature.href}
-                                        className="group flex flex-col gap-3 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
+                                        className="group flex flex-col gap-2.5 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
                                     >
                                         <span
-                                            className="flex h-12 w-12 items-center justify-center rounded-2xl border bg-[#11131F]/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-xl transition duration-300 group-hover:-translate-y-1"
+                                            className="flex h-10 w-10 items-center justify-center rounded-xl border bg-[#11131F]/90 backdrop-blur-xl transition duration-300 group-hover:-translate-y-0.5"
                                             style={{
                                                 borderColor: `${feature.color}30`,
-                                                boxShadow: `inset 0 1px 0 rgba(255,255,255,0.04)`,
+                                                boxShadow: `inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -14px ${feature.color}`,
                                             }}
                                         >
                                             <Icon
-                                                size={23}
+                                                size={19}
                                                 strokeWidth={1.6}
                                                 style={{ color: feature.color }}
                                                 className="transition duration-300 group-hover:scale-110"
@@ -731,11 +591,10 @@ export default function HeroSection() {
                                         </span>
 
                                         <span>
-                                            <span className="block text-sm font-medium text-slate-100 transition group-hover:text-white">
+                                            <span className="block text-[13px] font-medium text-slate-100 transition group-hover:text-white">
                                                 {feature.title}
                                             </span>
-
-                                            <span className="mt-1 block text-xs leading-5 text-slate-400">
+                                            <span className="mt-0.5 block text-[11px] leading-4 text-slate-500">
                                                 {feature.text}
                                             </span>
                                         </span>

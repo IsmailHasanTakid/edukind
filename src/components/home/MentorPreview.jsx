@@ -3,6 +3,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import {
+    ArrowUpRight,
+    Briefcase,
+    CalendarCheck,
+    Code2,
+    GraduationCap,
+    Lightbulb,
+    MessageCircle,
+    Mic,
+} from "lucide-react";
 
 /* ------------------------------------------------------------------ */
 /* Config: keep LIMIT and MAX_CHARS in sync with route.js              */
@@ -57,6 +67,86 @@ const TOPICS = [
         ],
     },
 ];
+
+// Other tools inside Mentor Space. Add an `href` to a tool to link it to its own route.
+const TOOLS = [
+    { id: "learn", title: "Learn with AI", text: "Step-by-step guided learning for difficult concepts.", icon: GraduationCap, color: "#22D3EE" },
+    { id: "code", title: "Code Mentor", text: "Understand code and improve your programming skills.", icon: Code2, color: "#34D399" },
+    { id: "solver", title: "Problem Solver", text: "Break complex problems into smaller, solvable steps.", icon: Lightbulb, color: "#FBBF24" },
+    { id: "planner", title: "AI Study Planner", text: "Turn your goals into a structured learning roadmap.", icon: CalendarCheck, color: "#F472B6", badge: "New" },
+    { id: "career", title: "Career Guidance", text: "Explore career paths and plan your next steps.", icon: Briefcase, color: "#60A5FA" },
+    { id: "interview", title: "AI Interviewer", text: "Practice interviews with adaptive questions and feedback.", icon: Mic, color: "#38BDF8" },
+];
+
+/* ------------------------------------------------------------------ */
+/* Tool tile (small card that links to /mentor)                         */
+/* ------------------------------------------------------------------ */
+function onCardMove(e) {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+}
+
+function ToolTile({ tool, index }) {
+    const Icon = tool.icon;
+    return (
+        <Link
+            href={tool.href ?? MENTOR_HREF}
+            onMouseMove={onCardMove}
+            style={{ "--i": index }}
+            className="mp-tile group relative isolate flex flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0B0F1C]/80 p-5 backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-white/[0.2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/60"
+        >
+            <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                style={{
+                    background: `radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%), ${tool.color}26, transparent 65%)`,
+                }}
+            />
+            <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-12 -top-12 -z-10 h-32 w-32 rounded-full opacity-[0.14] blur-3xl transition-opacity duration-500 group-hover:opacity-30"
+                style={{ backgroundColor: tool.color }}
+            />
+
+            <div className="flex items-start justify-between">
+                <span
+                    className="grid h-10 w-10 place-items-center rounded-xl border transition duration-300 group-hover:scale-105"
+                    style={{
+                        borderColor: `${tool.color}40`,
+                        backgroundColor: `${tool.color}16`,
+                        boxShadow: `0 8px 24px -12px ${tool.color}`,
+                    }}
+                >
+                    <Icon size={19} strokeWidth={1.7} style={{ color: tool.color }} />
+                </span>
+                <div className="flex items-center gap-2">
+                    {tool.badge && (
+                        <span
+                            className="rounded-full border px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.12em]"
+                            style={{
+                                borderColor: `${tool.color}44`,
+                                backgroundColor: `${tool.color}14`,
+                                color: tool.color,
+                            }}
+                        >
+                            {tool.badge}
+                        </span>
+                    )}
+                    <ArrowUpRight
+                        size={16}
+                        className="text-slate-500 transition duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white"
+                    />
+                </div>
+            </div>
+
+            <h4 className="mt-auto pt-4 text-[16px] font-semibold tracking-[-0.02em] text-white">
+                {tool.title}
+            </h4>
+            <p className="mt-1.5 text-[13px] leading-6 text-slate-400">{tool.text}</p>
+        </Link>
+    );
+}
 
 /* ------------------------------------------------------------------ */
 /* Browser-side usage counter (UI only, the real limit is on server)   */
@@ -421,10 +511,9 @@ export default function MentorPreview() {
                         }}
                     />
                 </div>
-
             </div>
 
-            <div className="relative mx-auto max-w-3xl px-4 pt-20 sm:px-6 sm:pt-28">
+            <div className="relative mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-12">
                 {/* ---------- Heading ---------- */}
                 <header className="relative text-center">
                     <h2
@@ -442,254 +531,286 @@ export default function MentorPreview() {
                     </p>
                 </header>
 
-                {/* ---------- Topic switcher ---------- */}
-                <div
-                    role="tablist"
-                    aria-label="Question topics"
-                    className="mx-auto mt-8 flex w-fit max-w-full flex-wrap justify-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1 backdrop-blur"
-                >
-                    {TOPICS.map((t) => {
-                        const active = t.id === topicId;
-                        return (
-                            <button
-                                key={t.id}
-                                type="button"
-                                role="tab"
-                                aria-selected={active}
-                                onClick={() => setTopicId(t.id)}
-                                className={`rounded-full px-4 py-1.5 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 ${active
-                                    ? "bg-gradient-to-r from-cyan-300 to-blue-400 text-[#03101f] shadow-[0_0_24px_-4px_rgba(103,232,249,0.7)]"
-                                    : "text-slate-300 hover:bg-white/10 hover:text-white"
-                                    }`}
-                            >
-                                {t.label}
-                            </button>
-                        );
-                    })}
-                </div>
-
-                {/* ---------- Chat panel ---------- */}
-                <div className="mt-6 rounded-[28px] bg-gradient-to-b from-cyan-300/40 via-white/10 to-violet-400/30 p-px shadow-[0_0_100px_-24px_rgba(56,189,248,0.5)]">
-                    <div className="rounded-[27px] bg-[#080c1f]/90 backdrop-blur-xl">
-                        {/* top bar */}
-                        <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-5">
-                            <div className="flex items-center gap-2.5">
-                                <span className="relative flex h-2.5 w-2.5">
+                {/* ---------- Mentor Space bento ---------- */}
+                <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {/* ===== Ask AI Mentor (live chat) ===== */}
+                    <div
+                        className="mp-tile relative h-[580px] rounded-3xl bg-gradient-to-b from-cyan-300/40 via-white/10 to-violet-400/30 p-px shadow-[0_0_100px_-24px_rgba(56,189,248,0.5)] sm:col-span-2 sm:h-[600px] lg:row-span-3"
+                        style={{ "--i": 0 }}
+                    >
+                        <div className="flex h-full flex-col rounded-[23px] bg-[#080c1f]/90 backdrop-blur-xl">
+                            {/* top bar */}
+                            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-5">
+                                <div className="flex items-center gap-3">
                                     <span
-                                        className={`absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-60 ${loading ? "motion-safe:animate-ping" : "hidden"
-                                            }`}
-                                    />
-                                    <span
-                                        className={`relative inline-flex h-2.5 w-2.5 rounded-full ${limitReached ? "bg-slate-500" : "bg-cyan-300"
-                                            }`}
-                                    />
-                                </span>
-                                <span className="text-sm font-medium text-slate-100">
-                                    {loading ? "AI Mentor is thinking..." : "AI Mentor"}
-                                </span>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <div
-                                    className="flex items-center gap-1"
-                                    role="img"
-                                    aria-label={`${remaining} questions left`}
-                                >
-                                    {Array.from({ length: LIMIT }).map((_, i) => (
-                                        <span
-                                            key={i}
-                                            className={`h-1.5 w-5 rounded-full transition-colors duration-500 ${i < remaining
-                                                ? "bg-cyan-300 shadow-[0_0_8px_rgba(103,232,249,0.8)]"
-                                                : "bg-white/15"
-                                                }`}
-                                        />
-                                    ))}
-                                </div>
-                                <Link
-                                    href={MENTOR_HREF}
-                                    className="hidden rounded-full border border-white/15 px-3 py-1 text-xs font-medium text-slate-200 transition hover:border-cyan-300/60 hover:text-white sm:inline-block focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300"
-                                >
-                                    Open full Mentor
-                                </Link>
-                            </div>
-                        </div>
-
-                        {/* messages */}
-                        <div
-                            ref={scrollRef}
-                            className="max-h-[26rem] min-h-[16rem] overflow-y-auto px-4 py-5 sm:px-6"
-                            aria-live="polite"
-                        >
-                            {empty ? (
-                                <div className="flex min-h-[13rem] flex-col justify-center">
-                                    <p className="mb-3 flex items-center gap-2 text-sm text-slate-400">
-                                        <SparkIcon />
-                                        {limitReached
-                                            ? "Your free questions are used up for now"
-                                            : "Try one of these, or type your own"}
-                                    </p>
-                                    <div className="grid gap-2.5 sm:grid-cols-1">
-                                        {topic.prompts.map((p) => (
-                                            <button
-                                                key={p}
-                                                type="button"
-                                                onClick={() => send(p)}
-                                                disabled={loading || limitReached}
-                                                className="group flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left text-[15px] text-slate-200 transition hover:-translate-y-0.5 hover:border-cyan-300/50 hover:bg-cyan-300/[0.07] hover:text-white disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300"
-                                            >
-                                                <span>{p}</span>
-                                                <span className="shrink-0 text-cyan-300 opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100">
-                                                    <SendIcon />
-                                                </span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            ) : (
-                                <ul className="space-y-5">
-                                    {messages.map((m, i) => (
-                                        <li
-                                            key={i}
-                                            className={m.role === "user" ? "flex justify-end" : "flex justify-start"}
-                                        >
-                                            {m.role === "user" ? (
-                                                <p className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-gradient-to-br from-cyan-300 to-blue-500 px-4 py-2.5 text-[15px] leading-7 text-[#03101f] shadow-[0_8px_30px_-10px_rgba(56,189,248,0.8)]">
-                                                    {m.content}
-                                                </p>
-                                            ) : (
-                                                <div className="max-w-full rounded-2xl rounded-bl-md border border-white/10 bg-white/[0.04] px-4 py-3 sm:max-w-[92%]">
-                                                    <Answer text={m.content} />
-                                                </div>
-                                            )}
-                                        </li>
-                                    ))}
-
-                                    {loading && (
-                                        <li className="flex justify-start">
-                                            <div
-                                                className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-white/10 bg-white/[0.04] px-4 py-3.5"
-                                                role="status"
-                                                aria-label="Generating answer"
-                                            >
-                                                {[0, 1, 2].map((d) => (
-                                                    <span
-                                                        key={d}
-                                                        className="h-2 w-2 rounded-full bg-cyan-300/80 motion-safe:animate-bounce"
-                                                        style={{ animationDelay: `${d * 140}ms` }}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </li>
-                                    )}
-                                </ul>
-                            )}
-
-                            {error && (
-                                <p
-                                    role="alert"
-                                    className="mt-4 rounded-xl border border-rose-400/30 bg-rose-400/10 px-3.5 py-2.5 text-sm text-rose-200"
-                                >
-                                    {error}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* input or limit CTA */}
-                        <div className="border-t border-white/10 p-3 sm:p-4">
-                            {limitReached ? (
-                                <div className="flex flex-col items-center gap-3 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.06] px-4 py-5 text-center sm:flex-row sm:justify-between sm:text-left">
-                                    <div>
-                                        <p className="font-medium text-white">You've used your free questions</p>
-                                        <p className="mt-1 text-sm text-slate-300">
-                                            Keep going in the full AI Mentor: more questions, code help and study plans.
+                                        className="grid h-9 w-9 place-items-center rounded-xl border"
+                                        style={{
+                                            borderColor: "#A78BFA40",
+                                            backgroundColor: "#A78BFA16",
+                                            boxShadow: "0 8px 24px -12px #A78BFA",
+                                        }}
+                                    >
+                                        <MessageCircle size={18} strokeWidth={1.7} style={{ color: "#A78BFA" }} />
+                                    </span>
+                                    <div className="leading-tight">
+                                        <p className="flex items-center gap-2 text-sm font-semibold text-white">
+                                            Ask AI Mentor
+                                            <span className="relative flex h-2 w-2">
+                                                <span
+                                                    className={`absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-60 ${loading ? "motion-safe:animate-ping" : "hidden"
+                                                        }`}
+                                                />
+                                                <span
+                                                    className={`relative inline-flex h-2 w-2 rounded-full ${limitReached ? "bg-slate-500" : "bg-cyan-300"
+                                                        }`}
+                                                />
+                                            </span>
+                                        </p>
+                                        <p className="text-[11px] text-slate-400">
+                                            {loading ? "Thinking..." : "Free preview"}
                                         </p>
                                     </div>
-                                    <div className="flex shrink-0 flex-col items-center gap-2">
-                                        <Link
-                                            href={MENTOR_HREF}
-                                            className="rounded-full bg-gradient-to-r from-cyan-300 to-blue-400 px-5 py-2.5 text-sm font-semibold text-[#03101f] transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200"
-                                        >
-                                            Open AI Mentor
-                                        </Link>
-                                        {process.env.NODE_ENV === "development" && (
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    try {
-                                                        localStorage.removeItem(STORAGE_KEY);
-                                                    } catch {
-                                                        /* ignore */
-                                                    }
-                                                    setRemaining(LIMIT);
-                                                    setMessages([]);
-                                                }}
-                                                className="text-xs text-slate-400 underline underline-offset-2 hover:text-white"
-                                            >
-                                                Reset limit (dev only)
-                                            </button>
-                                        )}
-                                    </div>
                                 </div>
-                            ) : (
-                                <form
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                        send();
-                                    }}
+
+                                <div className="flex items-center gap-3">
+                                    <div
+                                        className="flex items-center gap-1"
+                                        role="img"
+                                        aria-label={`${remaining} questions left`}
+                                    >
+                                        {Array.from({ length: LIMIT }).map((_, i) => (
+                                            <span
+                                                key={i}
+                                                className={`h-1.5 w-5 rounded-full transition-colors duration-500 ${i < remaining
+                                                    ? "bg-cyan-300 shadow-[0_0_8px_rgba(103,232,249,0.8)]"
+                                                    : "bg-white/15"
+                                                    }`}
+                                            />
+                                        ))}
+                                    </div>
+                                    <Link
+                                        href={MENTOR_HREF}
+                                        className="hidden rounded-full border border-white/15 px-3 py-1 text-xs font-medium text-slate-200 transition hover:border-cyan-300/60 hover:text-white sm:inline-block"
+                                    >
+                                        Open full Mentor
+                                    </Link>
+                                </div>
+                            </div>
+
+                            {/* topic chips (hidden after the first question) */}
+                            {empty && !limitReached && (
+                                <div
+                                    role="tablist"
+                                    aria-label="Question topics"
+                                    className="flex flex-wrap gap-1.5 px-4 pt-4 sm:px-6"
                                 >
-                                    <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-[#050714]/80 p-2 transition focus-within:border-cyan-300/60 focus-within:shadow-[0_0_30px_-8px_rgba(103,232,249,0.6)]">
-                                        <label htmlFor="mentor-preview-input" className="sr-only">
-                                            Your question
-                                        </label>
-                                        <textarea
-                                            id="mentor-preview-input"
-                                            ref={textareaRef}
-                                            rows={1}
-                                            value={input}
-                                            onChange={(e) => setInput(e.target.value)}
-                                            onKeyDown={onKeyDown}
-                                            placeholder="Ask your question..."
-                                            disabled={loading}
-                                            className="max-h-32 min-h-[2.5rem] flex-1 resize-none bg-transparent px-2.5 py-2 text-[15px] text-white placeholder:text-slate-500 focus:outline-none disabled:opacity-60"
-                                        />
-                                        <button
-                                            type="submit"
-                                            disabled={!canSend}
-                                            aria-label="Send question"
-                                            className="flex h-10 shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-300 to-blue-400 px-4 text-sm font-semibold text-[#03101f] transition hover:brightness-110 disabled:cursor-not-allowed disabled:from-white/10 disabled:to-white/10 disabled:text-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200"
-                                        >
-                                            Ask
-                                            <SendIcon />
-                                        </button>
-                                    </div>
-                                    <div className="mt-2 flex justify-between px-1 text-xs text-slate-500">
-                                        <span>Enter to send, Shift + Enter for a new line</span>
-                                        <span className={tooLong ? "text-rose-300" : ""}>
-                                            {input.length}/{MAX_CHARS}
-                                        </span>
-                                    </div>
-                                </form>
+                                    {TOPICS.map((t) => {
+                                        const active = t.id === topicId;
+                                        return (
+                                            <button
+                                                key={t.id}
+                                                type="button"
+                                                role="tab"
+                                                aria-selected={active}
+                                                onClick={() => setTopicId(t.id)}
+                                                className={`rounded-full px-3.5 py-1 text-[13px] font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 ${active
+                                                    ? "bg-gradient-to-r from-cyan-300 to-blue-400 text-[#03101f]"
+                                                    : "border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white"
+                                                    }`}
+                                            >
+                                                {t.label}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             )}
+
+                            {/* messages */}
+                            <div
+                                ref={scrollRef}
+                                className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6"
+                                aria-live="polite"
+                            >
+                                {empty ? (
+                                    <div className="flex h-full flex-col justify-center">
+                                        <p className="mb-3 flex items-center gap-2 text-sm text-slate-400">
+                                            <SparkIcon />
+                                            {limitReached
+                                                ? "Your free questions are used up for now"
+                                                : "Try one of these, or type your own"}
+                                        </p>
+                                        <div className="grid gap-2.5">
+                                            {topic.prompts.map((p) => (
+                                                <button
+                                                    key={p}
+                                                    type="button"
+                                                    onClick={() => send(p)}
+                                                    disabled={loading || limitReached}
+                                                    className="group flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left text-[15px] text-slate-200 transition hover:-translate-y-0.5 hover:border-cyan-300/50 hover:bg-cyan-300/[0.07] hover:text-white disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300"
+                                                >
+                                                    <span>{p}</span>
+                                                    <span className="shrink-0 text-cyan-300 opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100">
+                                                        <SendIcon />
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <ul className="space-y-5">
+                                        {messages.map((m, i) => (
+                                            <li
+                                                key={i}
+                                                className={m.role === "user" ? "flex justify-end" : "flex justify-start"}
+                                            >
+                                                {m.role === "user" ? (
+                                                    <p className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-gradient-to-br from-cyan-300 to-blue-500 px-4 py-2.5 text-[15px] leading-7 text-[#03101f] shadow-[0_8px_30px_-10px_rgba(56,189,248,0.8)]">
+                                                        {m.content}
+                                                    </p>
+                                                ) : (
+                                                    <div className="max-w-full rounded-2xl rounded-bl-md border border-white/10 bg-white/[0.04] px-4 py-3 sm:max-w-[92%]">
+                                                        <Answer text={m.content} />
+                                                    </div>
+                                                )}
+                                            </li>
+                                        ))}
+
+                                        {loading && (
+                                            <li className="flex justify-start">
+                                                <div
+                                                    className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-white/10 bg-white/[0.04] px-4 py-3.5"
+                                                    role="status"
+                                                    aria-label="Generating answer"
+                                                >
+                                                    {[0, 1, 2].map((d) => (
+                                                        <span
+                                                            key={d}
+                                                            className="h-2 w-2 rounded-full bg-cyan-300/80 motion-safe:animate-bounce"
+                                                            style={{ animationDelay: `${d * 140}ms` }}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </li>
+                                        )}
+                                    </ul>
+                                )}
+
+                                {error && (
+                                    <p
+                                        role="alert"
+                                        className="mt-4 rounded-xl border border-rose-400/30 bg-rose-400/10 px-3.5 py-2.5 text-sm text-rose-200"
+                                    >
+                                        {error}
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* input or limit CTA */}
+                            <div className="border-t border-white/10 p-3 sm:p-4">
+                                {limitReached ? (
+                                    <div className="flex flex-col items-center gap-3 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.06] px-4 py-5 text-center sm:flex-row sm:justify-between sm:text-left">
+                                        <div>
+                                            <p className="font-medium text-white">
+                                                You've used your {LIMIT} free questions
+                                            </p>
+                                            <p className="mt-1 text-sm text-slate-300">
+                                                Keep going in the full AI Mentor: unlimited chat, code help and study plans.
+                                            </p>
+                                        </div>
+                                        <div className="flex shrink-0 flex-col items-center gap-2">
+                                            <Link
+                                                href={MENTOR_HREF}
+                                                className="rounded-full bg-gradient-to-r from-cyan-300 to-blue-400 px-5 py-2.5 text-sm font-semibold text-[#03101f] transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200"
+                                            >
+                                                Open AI Mentor
+                                            </Link>
+                                            {process.env.NODE_ENV === "development" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        try {
+                                                            localStorage.removeItem(STORAGE_KEY);
+                                                        } catch {
+                                                            /* ignore */
+                                                        }
+                                                        setRemaining(LIMIT);
+                                                        setMessages([]);
+                                                    }}
+                                                    className="text-xs text-slate-400 underline underline-offset-2 hover:text-white"
+                                                >
+                                                    Reset limit (dev only)
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            send();
+                                        }}
+                                    >
+                                        <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-[#050714]/80 p-2 transition focus-within:border-cyan-300/60 focus-within:shadow-[0_0_30px_-8px_rgba(103,232,249,0.6)]">
+                                            <label htmlFor="mentor-preview-input" className="sr-only">
+                                                Your question
+                                            </label>
+                                            <textarea
+                                                id="mentor-preview-input"
+                                                ref={textareaRef}
+                                                rows={1}
+                                                value={input}
+                                                onChange={(e) => setInput(e.target.value)}
+                                                onKeyDown={onKeyDown}
+                                                placeholder="Ask your question..."
+                                                disabled={loading}
+                                                className="max-h-32 min-h-[2.5rem] flex-1 resize-none bg-transparent px-2.5 py-2 text-[15px] text-white placeholder:text-slate-500 focus:outline-none disabled:opacity-60"
+                                            />
+                                            <button
+                                                type="submit"
+                                                disabled={!canSend}
+                                                aria-label="Send question"
+                                                className="flex h-10 shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-300 to-blue-400 px-4 text-sm font-semibold text-[#03101f] transition hover:brightness-110 disabled:cursor-not-allowed disabled:from-white/10 disabled:to-white/10 disabled:text-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200"
+                                            >
+                                                Ask
+                                                <SendIcon />
+                                            </button>
+                                        </div>
+                                        <div className="mt-2 flex justify-between px-1 text-xs text-slate-500">
+                                            <span>Enter to send, Shift + Enter for a new line</span>
+                                            <span className={tooLong ? "text-rose-300" : ""}>
+                                                {input.length}/{MAX_CHARS}
+                                            </span>
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
                         </div>
                     </div>
+
+                    {/* ===== Other 6 tools ===== */}
+                    {TOOLS.map((tool, i) => (
+                        <ToolTile key={tool.id} tool={tool} index={i + 1} />
+                    ))}
                 </div>
 
-                {/* ---------- Always-visible link to /mentor ---------- */}
-                <div className="mt-8 flex flex-col items-center gap-3">
-                    <Link
-                        href={MENTOR_HREF}
-                        className="group inline-flex items-center gap-2 rounded-full border border-cyan-300/40 bg-cyan-300/[0.08] px-6 py-3 text-sm font-semibold text-white shadow-[0_0_40px_-10px_rgba(103,232,249,0.6)] transition hover:border-cyan-300 hover:bg-cyan-300/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200"
-                    >
-                        Go to AI Mentor
-                        <span className="transition group-hover:translate-x-1">
-                            <SendIcon />
-                        </span>
-                    </Link>
-                    <p className="text-center text-xs text-slate-500">
-                        AI can make mistakes. Check important facts with a teacher or a textbook.
-                    </p>
-                </div>
+                <p className="mt-6 text-center text-xs text-slate-500">
+                    AI can make mistakes. Check important facts with a teacher or a textbook.
+                </p>
             </div>
+
+            <style>{`
+                @keyframes mp-rise {
+                    from { opacity: 0; transform: translateY(14px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .mp-tile {
+                    animation: mp-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+                    animation-delay: calc(var(--i, 0) * 70ms);
+                }
+                @media (prefers-reduced-motion: reduce) {
+                    .mp-tile { animation: none; }
+                }
+            `}</style>
         </section>
     );
 }
