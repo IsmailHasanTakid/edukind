@@ -146,9 +146,11 @@ export default function Navbar() {
                                 </span>
 
                                 <span className="flex min-w-0 flex-col gap-1">
-                                    <span className="truncate text-[15px] font-bold tracking-[0.17em] text-white transition-colors group-hover:text-cyan-50 sm:text-[16px]">
+
+                                    <span className="truncate bg-gradient-to-r from-cyan-200 via-blue-400 via-violet-400 to-fuchsia-400 bg-clip-text text-[15px] font-extrabold tracking-[0.17em] text-transparent transition-all duration-300 group-hover:from-cyan-100 group-hover:via-violet-300 group-hover:to-pink-300 sm:text-[20px]">
                                         {brand.name}
                                     </span>
+
 
                                     <span className="hidden whitespace-nowrap text-[8px] font-semibold tracking-[0.15em] text-zinc-500 sm:block">
                                         LEARN
