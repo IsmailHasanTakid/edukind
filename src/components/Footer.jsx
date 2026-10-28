@@ -1,6 +1,6 @@
 
 "use client";
-
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUp } from "lucide-react";
 
@@ -153,8 +153,14 @@ function FooterLink({ link }) {
     );
 }
 
+
 export default function Footer() {
-    const year = new Date().getFullYear();
+    const [year, setYear] = useState(null);
+
+    useEffect(() => {
+        setYear(new Date().getFullYear());
+    }, []);
+
 
     function backToTop() {
         const reduceMotion = window.matchMedia(
